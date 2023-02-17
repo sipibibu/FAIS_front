@@ -24,10 +24,19 @@ import { IconEdit, IconTrash } from "@tabler/icons";
 import FormData from "form-data";
 
 interface Props {
-  dish: IDish | null;
+  dish: {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    imageId?: string;
+  };
+  
+  onDelete: (id: string) => void;
+  onSave: (dish:Props) =>void;
 }
 
-export const DishComponent = ({ dish }: Props) => {
+export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
   const user: any = useRecoilValue(userAtom);
   const token = localStorage.getItem("token");
   const [image, setImage] = useState("");
@@ -82,6 +91,7 @@ export const DishComponent = ({ dish }: Props) => {
       );
 
       if (result.status === 200) {
+        onSave(result.data)
         showNotification({
           title: "Успешно",
           message: "Блюдо сохранено",
@@ -148,6 +158,7 @@ export const DishComponent = ({ dish }: Props) => {
   };
 
   const deleteDish = async (id?: string) => {
+    
     const result: AxiosResponse = await axiosInstance.delete(
       `/api/Dishes/${dish?.id}`,
       {
@@ -158,6 +169,7 @@ export const DishComponent = ({ dish }: Props) => {
     );
 
     if (result.status === 200) {
+      onDelete(dish.id)
       showNotification({
         title: "Успешно",
         message: "Блюдо удалено",
