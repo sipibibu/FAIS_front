@@ -15,10 +15,26 @@ import { showNotification } from "@mantine/notifications";
 import { axiosInstance } from "../axios";
 import FormData from "form-data";
 
-export const DishesPage = () => {
-  const token = localStorage.getItem("token");
-  const [dishes, setDishes] = useState<IDish[]>([]);
+interface DishProps {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageId?: string;
+} 
 
+export const DishesPage: React.FC = () => {
+  const token = localStorage.getItem("token");
+  const [dishes, setDishes] = useState<DishProps[]>([]);
+  const handleDeleteDish = (id: string) => {
+    console.log(1,id)
+    setDishes(dishes.filter((dish) => dish.id !== id));
+  };
+  const handleSaveDish = (obj_now:any) => {
+    let element=dishes.findIndex(dish=>dish.id ==obj_now.id)
+    dishes[element]=obj_now
+    setDishes([...dishes])
+  };
   useEffect(() => {
     const fetchData = async () => {
       const result: AxiosResponse = await axiosInstance.get(`/api/Dishes`, {
@@ -68,8 +84,9 @@ export const DishesPage = () => {
           },
         }
       );
-
+        console.log(result.data)
       if (result.status === 200) {
+        setDishes([...dishes, result.data]);
         showNotification({
           title: "Успешно",
           message: "Блюдо создано",
@@ -85,7 +102,6 @@ export const DishesPage = () => {
         });
       }
 
-      console.log(result);
     };
 
     return (
@@ -142,7 +158,7 @@ export const DishesPage = () => {
       </Button>
       {dishes &&
         dishes.map((dish: IDish) => (
-          <DishComponent dish={dish} key={dish.id} />
+          <DishComponent dish={dish} key={dish.id} onDelete={handleDeleteDish} onSave={handleSaveDish} />
         ))}
     </>
   );

@@ -53,7 +53,6 @@ interface AddDishesProps {
 }
 
 const UpdateMenuModal = ({ menu }: AddDishesProps) => {
-  console.log(menu);
   const [dishes, setDishes] = useState([]);
   const token = localStorage.getItem("token");
 
@@ -77,7 +76,7 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
       title: menu.title,
       description: menu.description,
       timeToService: menu.timeToService.toString(),
-      dishIds: menu.dishes.map((dish: IDish) => dish.id),
+      dishIds: menu.dishes?.map((dish: IDish) => dish.id),
     },
   });
 
@@ -116,7 +115,6 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
       });
     }
 
-    console.log(result);
   };
 
   const time = [
@@ -185,6 +183,7 @@ const deleteMenu = async (menuId: string) => {
   );
 
   if (result.status === 200) {
+    //Сделать удалениеsetDishes(dishes.filter((dish) => dish.id !== id));
     showNotification({
       title: "Успешно",
       message: "Меню удалено",
@@ -359,13 +358,12 @@ export const MenusPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMenus(result.data.data);
+      setMenus([...result.data.data]); //ошибка при пустом спимке меню, но работатет)
       setFetching(false);
     };
-
     fetchData();
   }, []);
-
+  //console.log(menus)
   const items =
     menus &&
     menus.map((menu: IMenu) => (
@@ -376,7 +374,7 @@ export const MenusPage = () => {
 
         <Accordion.Panel>
           <Box>
-            {menu.dishes.map((dish: IDish) => (
+            {menu.dishes?.map((dish: IDish) => (
               <NavLink
                 key={dish.id}
                 label={
@@ -415,14 +413,13 @@ export const MenusPage = () => {
           description: form.values.description,
           timeToService: +form.values.timeToService,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { authorization: `Bearer ${token}` } }
       );
 
       if (result.status === 200) {
+        console.log([menus])
+        console.log(typeof(menus))
+        setMenus([...menus, result.data.data])
         showNotification({
           title: "Успешно",
           message: "Меню создано",
@@ -437,8 +434,6 @@ export const MenusPage = () => {
           color: "red",
         });
       }
-
-      console.log(result);
     };
 
     const time = [

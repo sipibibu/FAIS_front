@@ -62,7 +62,9 @@ export const EmployeesPage = () => {
         },
         { headers: { authorization: `Bearer ${token}` } }
       );
+
       if (result.status === 200) {
+        console.log(result)
         showNotification({
           title: "Успешно",
           message: `Данные для входа: ${result.data.data.login}:${result.data.data.password} `,
