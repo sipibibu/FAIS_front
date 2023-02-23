@@ -100,6 +100,7 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
     );
 
     if (result.status === 200) {
+      console.log(menu)
       showNotification({
         title: "Успешно",
         message: "Меню обновлено",
@@ -351,6 +352,9 @@ export const MenusPage = () => {
   const navigate = useNavigate();
   const token: string | null = localStorage.getItem("token");
 
+  const handleDelMenu = (obj_now:any) => {
+    setMenus(menus.filter((menu) => menu.id !== obj_now.id))
+  };
   useEffect(() => {
     const fetchData = async () => {
       const result: AxiosResponse = await axiosInstance.get("api/Menu", {
@@ -405,7 +409,7 @@ export const MenusPage = () => {
       },
     });
 
-    const saveMenu = async () => {
+    const createMenu = async () => {
       const result: AxiosResponse = await axiosInstance.post(
         "/api/Menu",
         {
@@ -417,8 +421,7 @@ export const MenusPage = () => {
       );
 
       if (result.status === 200) {
-        console.log([menus])
-        console.log(typeof(menus))
+        console.log(1)
         setMenus([...menus, result.data.data])
         showNotification({
           title: "Успешно",
@@ -446,7 +449,7 @@ export const MenusPage = () => {
     ];
 
     return (
-      <form onSubmit={form.onSubmit(saveMenu)}>
+      <form onSubmit={form.onSubmit(createMenu)}>
         <TextInput
           label="Название"
           placeholder="Название"

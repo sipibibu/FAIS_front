@@ -48,7 +48,8 @@ export const ClassesPage = () => {
       setFetching(false);
     };
     fetchClasses();
-    console.log(teachers, classes);
+    
+    //console.log(teachers, classes);
   }, []);
 
   const CreateClassModal = () => {
@@ -67,7 +68,8 @@ export const ClassesPage = () => {
         teacherId: form.values.teacherId,
         schoolKids: [],
       });
-
+      console.log(form.values)
+      console.log(response)
       if (response.data.statusCode === 200) {
         showNotification({
           title: "Успешно",
@@ -146,6 +148,7 @@ export const ClassesPage = () => {
 
       if (response.data.statusCode === 200) {
         // setClasses((cl) => [...cl, response.data.data]);
+        
         showNotification({
           title: "Успешно",
           message: "Информация обновлена",
@@ -258,7 +261,6 @@ export const ClassesPage = () => {
             title: "Учитель",
             width: 400,
             render: (record) => {
-              console.log(teachers, record);
               return (
                 teachers.find((teacher: any) => teacher.id === record.teacherId)
                   ?.name || "-"

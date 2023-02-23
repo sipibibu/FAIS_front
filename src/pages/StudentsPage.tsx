@@ -9,7 +9,7 @@ import { DataTable } from "mantine-datatable";
 
 export const StudentsPage = () => {
   const token: string | null = localStorage.getItem("token");
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true)
 
   useEffect(() => {
@@ -62,6 +62,8 @@ export const StudentsPage = () => {
         { headers: { authorization: `Bearer ${token}` } }
       );
       if (data.status === 200) {
+        console.log(data)
+        setStudents([...students, data.data.data])
         showNotification({
           title: "Успешно",
           message: "Ученик создан",
@@ -113,6 +115,11 @@ export const StudentsPage = () => {
       );
 
       if (result.data.statusCode === 200) {
+        console.log(students)
+        console.log(result.data.data)
+        let index_element=students.findIndex(student=>student.id ==result.data.data.id)
+        students[index_element]=result.data.data
+        setStudents([...students])
         showNotification({
           title: "Успешно",
           message: `Данные обновлены`,
