@@ -31,8 +31,8 @@ export const DishesPage: React.FC = () => {
     setDishes(dishes.filter((dish) => dish.id !== id));
   };
   const handleSaveDish = (obj_now:any) => {
-    let element=dishes.findIndex(dish=>dish.id ==obj_now.id)
-    dishes[element]=obj_now
+    let index_element=dishes.findIndex(dish=>dish.id ==obj_now.id)
+    dishes[index_element]=obj_now
     setDishes([...dishes])
   };
   useEffect(() => {

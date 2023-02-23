@@ -9,7 +9,7 @@ import { DataTable } from "mantine-datatable";
 
 export const EmployeesPage = () => {
   const token: string | null = localStorage.getItem("token");
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true)
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const EmployeesPage = () => {
       );
 
       if (result.status === 200) {
-        console.log(result)
+        setEmployees([...employees,result.data.data.person])
         showNotification({
           title: "Успешно",
           message: `Данные для входа: ${result.data.data.login}:${result.data.data.password} `,
@@ -118,6 +118,11 @@ export const EmployeesPage = () => {
       );
 
       if (result.data.statusCode === 200) {
+        console.log(employees)
+        console.log(result.data.data)
+        let index_element=employees.findIndex(dish=>dish.id ==result.data.data.id)
+        employees[index_element]=result.data.data
+        setEmployees([...employees])
         showNotification({
           title: "Успешно",
           message: `Данные обновлены`,

@@ -34,11 +34,10 @@ export const TeachersPage = () => {
       setTeachers(response.data.data);
       setFetching(false);
     };
-
+    
     fetchTeachers();
   }, []);
-
-
+  
   const deleteTeacher = async (teacherId: string) => {
     const data = await axiosInstance.delete(`/api/Account/DeleteTeacher?id=${teacherId}`, { headers: { authorization: `Bearer ${token}` } })
 
@@ -49,8 +48,8 @@ export const TeachersPage = () => {
         color: "teal",
       });
 
-      setTeachers((old) => old.filter(t => t.id !== teacherId));
-
+      setTeachers(teachers.filter(t => t.id !== teacherId));
+      console.log(teacherId)
       closeAllModals();
     } else {
       showNotification({
@@ -79,6 +78,9 @@ export const TeachersPage = () => {
       );
 
       if (result.data.statusCode === 200) {
+        setTeachers([...teachers,result.data.data.person]);
+        console.log(teachers)
+        console.log(result)
         showNotification({
           title: "Успешно",
           message: `Данные для входа: ${result.data.data.login}:${result.data.data.password} `,
@@ -86,7 +88,7 @@ export const TeachersPage = () => {
           color: "teal",
         });
 
-        setTeachers((old) => [...old, result.data]);
+        //setTeachers((old) => [...old, result.data]);
 
         closeAllModals();
       } else {
@@ -139,6 +141,12 @@ export const TeachersPage = () => {
       );
 
       if (result.data.statusCode === 200) {
+        console.log(teachers)
+        console.log(result.data.data)
+        let index_element=teachers.findIndex(teach=>teach.id ==result.data.data.id)
+        teachers[index_element]=result.data.data
+        setTeachers([...teachers])
+
         showNotification({
           title: "Успешно",
           message: `Данные обновлены`,

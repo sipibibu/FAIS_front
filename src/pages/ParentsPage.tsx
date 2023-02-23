@@ -9,7 +9,7 @@ import { DataTable } from "mantine-datatable";
 
 export const ParentsPage = () => {
   const token: string | null = localStorage.getItem("token");
-  const [parents, setParents] = useState([]);
+  const [parents, setParents] = useState<any[]>([]);
   const [kids, setKids] = useState([])
   const [fetching, setFetching] = useState(true)
 
@@ -29,7 +29,7 @@ export const ParentsPage = () => {
 
     fetchParents();
   }, []);
-
+  console.log(parents)
   const deleteParent = async (parentId: string) => {
     const data = await axiosInstance.delete(`/api/Account/DeleteTrustee?id=${parentId}`, { headers: { authorization: `Bearer ${token}` } })
 
@@ -39,9 +39,7 @@ export const ParentsPage = () => {
         message: `Родитель удален`,
         color: "teal",
       });
-
-      setParents((old) => old.filter((s: any) => s.id !== parent));
-
+      setParents(parents.filter((s: any) => s.id !== parentId));
       closeAllModals();
     } else {
       showNotification({
@@ -69,6 +67,8 @@ export const ParentsPage = () => {
         { headers: { authorization: `Bearer ${token}` } }
       );
       if (result.status === 200) {
+        console.log(result)
+        setParents([...parents,result.data.data.person])
         showNotification({
           title: "Успешно",
           message: `Данные для входа: ${result.data.data.login}:${result.data.data.password} `,
@@ -105,7 +105,7 @@ export const ParentsPage = () => {
   };
 
   const UpdateParentModal = (props: any) => {
-    const [selected, setSelected] = useState(kids.filter((k: any) => props.parent.schoolKidIds.includes(k.id)).map((k: any) => k.id))
+    const [selected, setSelected] = useState(kids.filter((k: any) => props.parent.schoolKidIds?.includes(k.id)).map((k: any) => k.id))
     const form = useForm({
       initialValues: {
         name: props.parent.name,
@@ -124,6 +124,13 @@ export const ParentsPage = () => {
       );
 
       if (result.data.statusCode === 200) {
+
+        console.log(parents)
+        console.log(result.data.data)
+        let index_element=parents.findIndex(parent=>parent.id ==result.data.data.id)
+        parents[index_element]=result.data.data
+        setParents([...parents])
+
         showNotification({
           title: "Успешно",
           message: `Данные обновлены`,
