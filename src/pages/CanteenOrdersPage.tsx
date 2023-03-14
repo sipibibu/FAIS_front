@@ -61,7 +61,7 @@ export const CanteenOrdersPage = () => {
   }, []);
 
   return (
-    <Box><a href={`https://418c-94-140-132-141.eu.ngrok.io/api/Report/GetExcel/`} download>
+    <Box><a href={`http://212.96.201.66:8000/api/Report/GetExcel/`} download>
       <Button mx={10}>{reportUrl ? 'Скачать' : 'Сформировать общий отчёт'}</Button>
     </a><DataTable
         my={10}
@@ -80,7 +80,7 @@ export const CanteenOrdersPage = () => {
             render: (record) => record.classOrders.length,
           },
           {
-            accessor: 'downloadReport', title: 'Отчет', render: record => <a href={`https://5783-94-140-140-141.eu.ngrok.io/api/Report/GetExcel/${record.classInfo.id}`} download>
+            accessor: 'downloadReport', title: 'Отчет', render: record => <a href={`http://212.96.201.66:8000/api/Report/GetExcel/${record.classInfo.id}`} download>
               <Button mx={10}>{reportUrl ? 'Скачать' : 'Сформировать отчёт'}</Button>
             </a>
           }

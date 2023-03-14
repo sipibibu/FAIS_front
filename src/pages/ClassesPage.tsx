@@ -45,11 +45,11 @@ export const ClassesPage = () => {
         headers: { authorization: `Bearer ${token}` },
       });
       setClasses(response.data.data);
+      console.log(classes)
       setFetching(false);
     };
     fetchClasses();
     
-    //console.log(teachers, classes);
   }, []);
 
   const CreateClassModal = () => {
@@ -148,13 +148,12 @@ export const ClassesPage = () => {
 
       if (response.data.statusCode === 200) {
         // setClasses((cl) => [...cl, response.data.data]);
-        
         showNotification({
           title: "Успешно",
           message: "Информация обновлена",
           color: "teal",
         });
-
+        console.log(response)
         setClasses((prev: any[]) =>
           prev.map((obj) => {
             if (obj.id === response.data.data.id)
@@ -270,7 +269,7 @@ export const ClassesPage = () => {
           {
             accessor: "schoolKids",
             title: "Кол-во учеников",
-            render: (record) => record.schoolKids?.length,
+            render: (record) => record.schoolKidIds?.length,
           },
           {
             accessor: "actions",

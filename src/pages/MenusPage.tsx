@@ -172,7 +172,8 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
   );
 };
 
-const deleteMenu = async (menuId: string) => {
+const deleteMenu = async (menuId: string,menus:any) => {
+  menus[1]([...menus[0].filter((menu:any) => menu.id !== menuId)])//Прокинул прос от Menupage->AccordionControl->deleteMenu. Думаю кринж,но работает)
   const token = localStorage.getItem("token");
   const result: AxiosResponse = await axiosInstance.delete(
     `/api/Menu/${menuId}`,
@@ -292,8 +293,9 @@ const CreateOrderModal = ({ menu }: CreateOrderModalProps) => {
   );
 };
 
-const AccordionControl = (props: AccordionControlProps & { menu: IMenu }) => {
+const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:any}) => {
   const user: any = useRecoilValue(userAtom);
+
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <Accordion.Control {...props} />
@@ -318,7 +320,7 @@ const AccordionControl = (props: AccordionControlProps & { menu: IMenu }) => {
                 Редактировать
               </Menu.Item>
               <Menu.Item
-                onClick={() => deleteMenu(props.menu.id)}
+                onClick={() => deleteMenu(props.menu.id,props.menus)}
                 color="red"
                 icon={<IconTrash />}
               >
@@ -372,7 +374,7 @@ export const MenusPage = () => {
     menus &&
     menus.map((menu: IMenu) => (
       <Accordion.Item value={menu.id} key={menu.id}>
-        <AccordionControl menu={menu}>
+        <AccordionControl menu={menu} menus={[menus, setMenus]}>
           <AccordionLabel {...menu} />
         </AccordionControl>
 
