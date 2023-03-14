@@ -120,6 +120,7 @@ export const NavbarWrapper = () => {
     ];
   if (user.role === "trustee")
     data = [
+      { link: "/account", label: "Аккаунт", icon: IconUser },
       { link: "/menus", label: "Меню", icon: IconToolsKitchen },
       {
         link: "/orders",
@@ -157,6 +158,7 @@ export const NavbarWrapper = () => {
     </a>
   ));
   return (
+    
     <div style={{ display: "flex", flexDirection: "row" }}>
       <Navbar width={{ sm: 300 }} sx={{ position: "fixed", zIndex: 0 }} p="md">
         <Navbar.Section grow>{links}</Navbar.Section>

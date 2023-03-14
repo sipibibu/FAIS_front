@@ -56,7 +56,7 @@ export const OrdersPage = () => {
           // fetching={fetching}
           columns={[
             { accessor: "kidName", title: "Имя", width: 300, render: record => kid.name },
-            { accessor: "menuTitle", title: "Меню", render: (record) => menus.find(m => m.id === record.menuId).title },
+            { accessor: "menuTitle", title: "Меню", render: (record) => menus.find(m => m.id === record.menuId)?.title },
           ]}
           records={orders}
           rowExpansion={{
@@ -65,7 +65,7 @@ export const OrdersPage = () => {
               return (
                 <>
                   {record.dishIds.map(did =>
-                    <NavLink label={menus.find(m => m.id === record.menuId).dishes.find(d => d.id === did).title} />)}
+                    <NavLink label={menus.find(m => m.id === record.menuId).dishes.find(d => d.id === did)?.title} />)}
                 </>
               )
             }

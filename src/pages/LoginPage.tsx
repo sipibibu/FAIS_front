@@ -49,6 +49,11 @@ export const LoginPage = () => {
         return;
       }
 
+      if ((jwtDecode(data.data.access_token) as any).role === "trustee") {
+        navigate("/account", { replace: true });
+        return;
+      }
+
       navigate("/menus", { replace: true });
 
       showNotification({

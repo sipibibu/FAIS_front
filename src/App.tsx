@@ -15,6 +15,7 @@ import { AttendancePage } from "./pages/AttendancePage";
 import { ClassesPage } from "./pages/ClassesPage";
 import { CanteenOrdersPage } from "./pages/CanteenOrdersPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { AccountPage } from "./pages/AccountPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<NavbarWrapper />}>
+                  <Route path="account" element={<AccountPage />} />
                   <Route path="menus" element={<MenusPage />} />
                   <Route path="dishes" element={<DishesPage />} />
                   <Route path="dishes/:dishId" element={<DishPage />} />

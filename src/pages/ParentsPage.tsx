@@ -32,7 +32,6 @@ export const ParentsPage = () => {
   console.log(parents)
   const deleteParent = async (parentId: string) => {
     const data = await axiosInstance.delete(`/api/Account/DeleteTrustee?id=${parentId}`, { headers: { authorization: `Bearer ${token}` } })
-
     if (data.data.statusCode === 200) {
       showNotification({
         title: "Успешно",
@@ -49,6 +48,7 @@ export const ParentsPage = () => {
       });
     }
   }
+  
 
   const CreateParentModal = () => {
     const form = useForm({
