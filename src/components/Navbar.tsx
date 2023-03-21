@@ -19,15 +19,16 @@ import { userAtom } from "../store";
 import jwtDecode from "jwt-decode";
 
 export const NavbarWrapper = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useRecoilState<any>(userAtom);
   const location = useLocation();
   useEffect(() => {
     const token = localStorage.getItem("token")!;
+    console.log(!token)
     if (!token) navigate("/login", { replace: true });
     setUser(jwtDecode(token));
   }, []);
-
-  const navigate = useNavigate();
+  
   const useStyles = createStyles((theme, _params, getRef) => {
     const icon = getRef("icon");
     return {
@@ -107,35 +108,45 @@ export const NavbarWrapper = () => {
   });
 
   let data: any[] = [];
+  
   if (user.role === "admin")
+
     data = [
       { link: "/menus", label: "Меню", icon: IconToolsKitchen },
+      { link: "/menu_buffet", label: "Меню Буфета", icon: IconFriends },
       { link: "/dishes", label: "Блюда", icon: IconSoup },
       { link: "/employees", label: "Сотрудники", icon: IconToolsKitchen2 },
-
       { link: "/teachers", label: "Учителя", icon: IconSchool },
       { link: "/parents", label: "Родители", icon: IconUser },
-      { link: "/students", label: "Ученики", icon: IconMoodKid },
+      { link: "/students", label: "Ученики", icon: IconMoodKid }, 
       { link: "/classes", label: "Классы", icon: IconFriends },
     ];
   if (user.role === "trustee")
     data = [
       { link: "/account", label: "Аккаунт", icon: IconUser },
       { link: "/menus", label: "Меню", icon: IconToolsKitchen },
-      {
-        link: "/orders",
-        label: "Заказы",
-        icon: IconListCheck,
-      },
+      { link: "/orders", label: "Заказы", icon: IconListCheck},
     ];
   if (user.role === "teacher")
     data = [{ link: "/attendance", label: "Посещаемость", icon: IconUsers }];
   if (user.role === "canteenEmployee")
     data = [
       { link: "/menus", label: "Меню", icon: IconToolsKitchen },
+      { link: "/menu_buffet", label: "Меню Буфета", icon: IconFriends },
       { link: "/dishes", label: "Блюда", icon: IconSoup },
-      { link: "/canteen", label: "Заказы", icon: IconMenuOrder },
+      { link: "/canteen", label: "Заказы столовой", icon: IconMenuOrder },
+      { link: "/order_buffet", label: "Заказы Буфета", icon: IconListCheck},
     ];
+  if (user.role === "schoolkid")
+    data = [
+      { link: "/menus", label: "Буфет", icon: IconToolsKitchen },
+      { link: "/order", label: "Заказы", icon: IconMenuOrder },
+    ];
+ //if (user.role !== "schoolkid")
+ //  data = [
+ //    { link: "/menu_buffet", label: "Меню Буфета", icon: IconFriends },
+ //    { link: "/schoolkidpage", label: "Буфет", icon: IconUsers },
+ //  ]
 
   const { classes, cx } = useStyles();
   const [active, setActive] = useState("Меню");

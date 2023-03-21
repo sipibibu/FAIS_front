@@ -23,7 +23,6 @@ export const CanteenOrdersPage = () => {
         const response_o = await axiosInstance.get(
           `/api/Report/GetByClass?classId=${cl.id}`
         );
-
         console.log([
           ...new Map(
             [
@@ -38,7 +37,7 @@ export const CanteenOrdersPage = () => {
             ].map((item) => [item.id, item])
           ).values(),
         ]);
-
+        
         setOrders((old) => [
           ...new Map(
             [
@@ -56,10 +55,10 @@ export const CanteenOrdersPage = () => {
       }
       setFetching(false);
     };
-
+    
     fetchData();
   }, []);
-
+  
   return (
     <Box><a href={`http://212.96.201.66:8000/api/Report/GetExcel/`} download>
       <Button mx={10}>{reportUrl ? 'Скачать' : 'Сформировать общий отчёт'}</Button>

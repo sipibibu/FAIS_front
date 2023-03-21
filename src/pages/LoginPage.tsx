@@ -43,7 +43,8 @@ export const LoginPage = () => {
 
       localStorage.setItem("token", data.data.access_token);
       setUser((user: any) => jwtDecode(data.data.access_token));
-
+      
+      
       if ((jwtDecode(data.data.access_token) as any).role === "teacher") {
         navigate("/attendance", { replace: true });
         return;

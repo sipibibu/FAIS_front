@@ -47,11 +47,12 @@ export function AccountPage({ avatar, name, title, phone, email }: any) {
           };
           Rofl();
       }, []);
-      console.log(user_info)
       console.log(kids)
+      console.log(user_info)
       
       return (
         <>
+        
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           
         <Group noWrap>
