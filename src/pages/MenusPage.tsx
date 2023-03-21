@@ -354,9 +354,6 @@ export const MenusPage = () => {
   const navigate = useNavigate();
   const token: string | null = localStorage.getItem("token");
 
-  const handleDelMenu = (obj_now:any) => {
-    setMenus(menus.filter((menu) => menu.id !== obj_now.id))
-  };
   useEffect(() => {
     const fetchData = async () => {
       const result: AxiosResponse = await axiosInstance.get("api/Menu", {
@@ -423,7 +420,6 @@ export const MenusPage = () => {
       );
 
       if (result.status === 200) {
-        console.log(1)
         setMenus([...menus, result.data.data])
         showNotification({
           title: "Успешно",
@@ -509,90 +505,7 @@ export const MenusPage = () => {
         {items && items}
       </Accordion>
 
-      {/*<DataTable*/}
-      {/*  withBorder*/}
-      {/*  borderRadius="sm"*/}
-      {/*  withColumnBorders*/}
-      {/*  striped*/}
-      {/*  highlightOnHover*/}
-      {/*  fetching={fetching}*/}
-      {/*  columns={[*/}
-      {/*    { accessor: "title", title: "Название", width: 200 },*/}
-      {/*    { accessor: "description", title: "Описание", width: 300 },*/}
-      {/*    {*/}
-      {/*      accessor: "timeToService",*/}
-      {/*      title: "Время подачи",*/}
-      {/*      width: 150,*/}
-      {/*      render: (record: IMenu) =>*/}
-      {/*        ["Завтрак", "Обед", "Ужин"][record.timeToService],*/}
-      {/*    },*/}
-      {/*    {*/}
-      {/*      accessor: "totalPrice",*/}
-      {/*      title: "Общая сумма",*/}
-      {/*      render: (record: IMenu) =>*/}
-      {/*        record.dishes.length > 0*/}
-      {/*          ? record.dishes*/}
-      {/*              .map((dish: IDish) => dish.price)*/}
-      {/*              .reduce((a, b) => a + b) + "₽"*/}
-      {/*          : "0₽",*/}
-      {/*    },*/}
-      {/*    {*/}
-      {/*      accessor: "actions",*/}
-      {/*      title: "Действия",*/}
-      {/*      render: (record) => (*/}
-      {/*        <Group spacing={4} position="apart">*/}
-      {/*          <ActionIcon*/}
-      {/*            color="blue"*/}
-      {/*            onClick={(e) => {*/}
-      {/*              e.stopPropagation();*/}
-      {/*              openModal({*/}
-      {/*                title: "Редактирование меню",*/}
-      {/*                children: <UpdateMenuModal menu={record} />,*/}
-      {/*              });*/}
-      {/*            }}*/}
-      {/*          >*/}
-      {/*            <IconEdit size={16} />*/}
-      {/*          </ActionIcon>*/}
 
-      {/*          <ActionIcon*/}
-      {/*            color="red"*/}
-      {/*            onClick={(e) => {*/}
-      {/*              e.stopPropagation();*/}
-      {/*              deleteMenu(record.id);*/}
-      {/*            }}*/}
-      {/*          >*/}
-      {/*            <IconTrash size={16} />*/}
-      {/*          </ActionIcon>*/}
-      {/*        </Group>*/}
-      {/*      ),*/}
-      {/*    },*/}
-      {/*  ]}*/}
-      {/*  records={menus}*/}
-      {/*  rowExpansion={{*/}
-      {/*    content: ({ record }) => (*/}
-      {/*      <>*/}
-      {/*        <Box>*/}
-      {/*          {record.dishes.map((dish: IDish, key: number) => (*/}
-      {/*            <NavLink*/}
-      {/*              key={dish.id}*/}
-      {/*              label={*/}
-      {/*                <Group position="apart">*/}
-      {/*                  {key + 1}. {dish.title}*/}
-      {/*                  <Badge color="green" variant="light">*/}
-      {/*                    {dish.price}₽*/}
-      {/*                  </Badge>*/}
-      {/*                </Group>*/}
-      {/*              }*/}
-      {/*              onClick={() =>*/}
-      {/*                user.role === "admin" && navigate(`/dishes/${dish.id}`)*/}
-      {/*              }*/}
-      {/*            />*/}
-      {/*          ))}*/}
-      {/*        </Box>*/}
-      {/*      </>*/}
-      {/*    ),*/}
-      {/*  }}*/}
-      {/*/>*/}
     </>
   );
 };

@@ -10,7 +10,6 @@ export const DishPage = () => {
   const params = useParams();
   const token = localStorage.getItem("token");
   const [dish, setDish] = useState<IDish | null>(null);
-
   useEffect(() => {
     const fetchData = async () => {
       const result: AxiosResponse = await axiosInstance.get(
@@ -21,7 +20,7 @@ export const DishPage = () => {
           },
         }
       );
-
+      console.log(result.data)
       setDish(result.data);
     };
     fetchData();

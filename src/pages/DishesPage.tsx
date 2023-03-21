@@ -42,6 +42,7 @@ export const DishesPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      //console.log(result)
       setDishes(result.data);
     };
     fetchData();
@@ -49,6 +50,7 @@ export const DishesPage: React.FC = () => {
 
   const FormModal = () => {
     const [image, setImage] = useState<File | null>(null);
+    console.log(image)
     const form = useForm({
       initialValues: {
         title: "",
@@ -60,16 +62,17 @@ export const DishesPage: React.FC = () => {
     const saveDish = async () => {
       let imageId = null;
       if (image) {
+        
         const data = new FormData();
         data.append("uploadedFile", image, image?.name);
         const imageResult = await axiosInstance.post("/api/FileUpload", data, {
           headers: { authorization: `Bearer ${token}` },
         });
-
+          
         if (imageResult.data.statusCode === 200)
           imageId = imageResult.data.data;
       }
-
+    
       const result: AxiosResponse = await axiosInstance.post(
         "/api/Dishes",
         {
@@ -103,7 +106,7 @@ export const DishesPage: React.FC = () => {
       }
 
     };
-
+  
     return (
       <form onSubmit={form.onSubmit(saveDish)}>
         <TextInput

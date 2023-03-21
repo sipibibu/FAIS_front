@@ -16,8 +16,14 @@ import { ClassesPage } from "./pages/ClassesPage";
 import { CanteenOrdersPage } from "./pages/CanteenOrdersPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { AccountPage } from "./pages/AccountPage";
+import { Order_buffet } from "./pages/Order_buffet";
+import { Menus_buffet } from "./pages/Menus_buffet";
+import { SchoolkidPage } from "./pages/SchoolKidPage";
+
 
 function App() {
+
+
   return (
     <MantineProvider withNormalizeCSS withGlobalStyles>
       <NotificationsProvider>
@@ -35,6 +41,9 @@ function App() {
                   <Route path="parents" element={<ParentsPage />} />
                   <Route path="students" element={<StudentsPage />} />
                   <Route path="students/:studentId" element={<StudentPage />} />
+                  <Route path="schoolkidpage" element={<SchoolkidPage />} />
+                  <Route path="menu_buffet" element={<Menus_buffet />} />
+                  <Route path="order_buffet" element={<Order_buffet />} />
                   <Route path="orders" element={<OrdersPage />} />
                   <Route path="attendance" element={<AttendancePage />} />
                   <Route path="canteen" element={<CanteenOrdersPage />} />

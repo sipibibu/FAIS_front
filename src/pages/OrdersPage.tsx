@@ -4,7 +4,19 @@ import jwtDecode from "jwt-decode";
 import { IDish } from "../types";
 import { DataTable } from "mantine-datatable";
 import { Box, NavLink } from "@mantine/core";
-
+import {
+  IconFriends,
+  IconListCheck,
+  IconLogout,
+  IconMenuOrder,
+  IconMoodKid,
+  IconSchool,
+  IconSoup,
+  IconToolsKitchen,
+  IconToolsKitchen2,
+  IconUser,
+  IconUsers,
+} from "@tabler/icons";
 export const OrdersPage = () => {
   const token = localStorage.getItem("token")!;
   const user: any = jwtDecode(token);
@@ -20,8 +32,9 @@ export const OrdersPage = () => {
       const result = await axiosInstance.get(
         `/api/Account/GetTrustesSchoolKids?trusteeId=${user.id}`
       );
-      const localKids = result.data.data.filter(x => x);
-      setKids(result.data.data.filter(x => x));
+      const localKids = result.data.data.filter((x:any) => x);
+      
+      setKids(result.data.data.filter((x:any) => x));
 
       if (localKids.length > 0) {
         for (const kid of localKids) {
@@ -56,16 +69,16 @@ export const OrdersPage = () => {
           // fetching={fetching}
           columns={[
             { accessor: "kidName", title: "Имя", width: 300, render: record => kid.name },
-            { accessor: "menuTitle", title: "Меню", render: (record) => menus.find(m => m.id === record.menuId)?.title },
+            { accessor: "menuTitle", title: "Меню", render: (record:any) => menus.find((m:any) => m.id === record.menuId)?.title },
           ]}
           records={orders}
           rowExpansion={{
-            content: ({ record }) => {
-              console.log(record)
+            content: ({ record }:any) => {
+              //console.log(record)
               return (
                 <>
-                  {record.dishIds.map(did =>
-                    <NavLink label={menus.find(m => m.id === record.menuId).dishes.find(d => d.id === did)?.title} />)}
+                  {record.dishIds.map((did:any) =>
+                    <NavLink label={menus.find((m:any) => m.id === record.menuId).dishes.find((d:any) => d.id === did)?.title} />)}
                 </>
               )
             }
