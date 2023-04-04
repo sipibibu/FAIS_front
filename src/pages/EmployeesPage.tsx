@@ -58,7 +58,7 @@ export const EmployeesPage = () => {
         `/api/Account/Register`,
         {
           name: form.values.name,
-          role: "canteenEmployee",
+          role: "canteenEmployee",  
         },
         { headers: { authorization: `Bearer ${token}` } }
       );

@@ -19,7 +19,7 @@ import { AccountPage } from "./pages/AccountPage";
 import { Order_buffet } from "./pages/Order_buffet";
 import { Menus_buffet } from "./pages/Menus_buffet";
 import { SchoolkidPage } from "./pages/SchoolKidPage";
-
+import { YooMoneyCheckout } from "./pages/Money";
 
 function App() {
 
@@ -48,6 +48,7 @@ function App() {
                   <Route path="attendance" element={<AttendancePage />} />
                   <Route path="canteen" element={<CanteenOrdersPage />} />
                   <Route path="employees" element={<EmployeesPage />} />
+                  <Route path="zxc" element={<YooMoneyCheckout />} />
                 </Route>
                 <Route path="/login" element={<LoginPage />} />
               </Routes>

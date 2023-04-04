@@ -28,6 +28,11 @@ export const TeachersPage = () => {
 
   useEffect(() => {
     const fetchTeachers = async () => {
+     // const data = await axiosInstance.get(`/api/Account/GetPersons?role=admin`, {
+     //   headers: { authorization: `Bearer ${token}` },
+     // });
+     // console.log(JSON.parse(data.data.data[0]))
+
       const response = await axiosInstance.get("/api/Account/GetTeachers", {
         headers: { authorization: `Bearer ${token}` },
       });

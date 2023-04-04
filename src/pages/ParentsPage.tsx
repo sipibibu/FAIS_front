@@ -66,6 +66,7 @@ export const ParentsPage = () => {
         },
         { headers: { authorization: `Bearer ${token}` } }
       );
+      console.log(result)
       if (result.status === 200) {
         console.log(result)
         setParents([...parents,result.data.data.person])

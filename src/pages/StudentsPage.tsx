@@ -230,6 +230,9 @@ export const StudentsPage = () => {
         ]}
         records={students}
       />
+
+
+      
     </>
   );
 };

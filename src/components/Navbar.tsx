@@ -23,8 +23,9 @@ export const NavbarWrapper = () => {
   const [user, setUser] = useRecoilState<any>(userAtom);
   const location = useLocation();
   useEffect(() => {
+    console.log(1)
     const token = localStorage.getItem("token")!;
-    console.log(!token)
+    console.log(user)
     if (!token) navigate("/login", { replace: true });
     setUser(jwtDecode(token));
   }, []);
@@ -142,11 +143,12 @@ export const NavbarWrapper = () => {
       { link: "/menus", label: "Буфет", icon: IconToolsKitchen },
       { link: "/order", label: "Заказы", icon: IconMenuOrder },
     ];
- //if (user.role !== "schoolkid")
- //  data = [
- //    { link: "/menu_buffet", label: "Меню Буфета", icon: IconFriends },
- //    { link: "/schoolkidpage", label: "Буфет", icon: IconUsers },
- //  ]
+  //if (user.role !== "schoolkid")
+  //  data = [
+  //    { link: "/menu_buffet", label: "Меню Буфета", icon: IconFriends },
+  //    { link: "/schoolkidpage", label: "Заказ", icon: IconUsers },
+  //    
+  //  ]
 
   const { classes, cx } = useStyles();
   const [active, setActive] = useState("Меню");
