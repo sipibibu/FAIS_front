@@ -31,52 +31,60 @@ export const ClassesPage = () => {
 
   useEffect(() => {
     const fetchClasses = async () => {
-      const response_s = await axiosInstance.get("/api/Account/GetSchoolKids", {
+      const response_s = await axiosInstance.get("/api/Account/GetPersons?role=schoolKid", {
         headers: { authorization: `Bearer ${token}` },
       });
-      setStudents(response_s.data.data);
+      const parse_data_k = response_s.data.data.map((qwe: string)  => JSON.parse(qwe));
+      setStudents(parse_data_k);
 
-      const response_t = await axiosInstance.get("/api/Account/GetTeachers", {
+      const response_t = await axiosInstance.get(`/api/Account/GetPersons?role=teacher`, {
         headers: { authorization: `Bearer ${token}` },
       });
-      setTeachers(response_t.data.data);
+      const parse_data_t = response_t.data.data.map((qwe: string)  => JSON.parse(qwe));
+      setTeachers(parse_data_t);
 
       const response = await axiosInstance.get("/api/Class/GetClasses", {
         headers: { authorization: `Bearer ${token}` },
       });
-      setClasses(response.data.data);
-      console.log(classes)
+      const parse_response = response.data.data.map((qwe: string)  => JSON.parse(qwe))
+      console.log(parse_response)
+      setClasses(parse_response);
       setFetching(false);
     };
     fetchClasses();
     
   }, []);
-
+  console.log(teachers)
   const CreateClassModal = () => {
     const form = useForm({
       initialValues: {
-        title: "",
-        teacherId: "",
-        studentIds: [] as string[],
+        Title: "",
+        TeacherId: "",
+        StudentIds: [] as string[],
       },
     });
-
     const createClass = async () => {
-      const response = await axiosInstance.post("/api/Class/CreateClass", {
-        title: form.values.title,
-        schoolKidIds: form.values.studentIds,
-        teacherId: form.values.teacherId,
-        schoolKids: [],
-      });
-      console.log(form.values)
-      console.log(response)
+
+      let asd={
+        Title: form.values.Title,
+        SchoolKidIds: form.values.StudentIds,
+        TeacherId: form.values.TeacherId,
+        SchoolKids: [],
+        $type:"Class"
+      }
+      const response = await axiosInstance.post(`/api/Class/CreateClass?_class=${JSON.stringify(asd)}`,
+      {},
+      { headers: { authorization: `Bearer ${token}` } }
+      );
+      const response_parse=(JSON.parse(response.data.data))
+      //const response_parse = Js
       if (response.data.statusCode === 200) {
         showNotification({
           title: "Успешно",
           message: "Класс создан",
           color: "teal",
         });
-        setClasses((cl) => [...cl, response.data.data]);
+        setClasses((cl) => [...cl, response_parse]);
         closeAllModals();
       } else {
         showNotification({
@@ -93,28 +101,22 @@ export const ClassesPage = () => {
           label="Наименование"
           placeholder="Наименование"
           data-autofocus
-          value={form.values.title}
+          value={form.values.Title}
           onChange={(event) =>
-            form.setFieldValue("title", event.currentTarget.value)
+            form.setFieldValue("Title", event.currentTarget.value)
           }
         />
         <Select
-          label="Учитель"
-          data={teachers.map((teacher: any) => ({
-            value: teacher.id,
-            label: teacher.name,
-          }))}
-          value={form.values.teacherId}
-          onChange={(value: string) => form.setFieldValue("teacherId", value)}
-        />
+            label="Учитель"
+            data={teachers.map((teacher: any) => ({ label: teacher.Name, value: teacher.Id }))}
+            value={form.values.TeacherId}
+            onChange={(value: string) => form.setFieldValue("TeacherId", value)}
+          />
         <MultiSelect
           label="Ученики"
-          data={students.map((student: any) => ({
-            value: student.id,
-            label: student.name,
-          }))}
-          value={form.values.studentIds}
-          onChange={(values) => form.setFieldValue("studentIds", values)}
+          data={students.filter(x => x).map((student: any) => ({ label: student.Name, value: student.Id }))}
+          value={form.values.StudentIds}
+          onChange={(values) => form.setFieldValue("StudentIds", values)}
         />
         <Button type="submit" fullWidth mt="md">
           Создать
@@ -126,24 +128,28 @@ export const ClassesPage = () => {
   interface Props {
     state: any;
   }
-  const UpdateClassModal = ({ state }: Props) => {
+  const UpdateClassModal = ({ state }: any) => {
     const form = useForm({
       initialValues: {
-        title: state.title,
-        teacherId: state.teacherId,
-        studentIds: state.schoolKidIds,
+        Title: state.Title,
+        TeacherId: state.TeacherId,
+        StudentIds: state.SchoolKidIds,
       },
     });
 
+    let data = {
+      $type: "Class",
+      Title: form.values.Title,
+      TeacherId:form.values.TeacherId,
+      SchoolKidIds:form.values.StudentIds,
+
+    }
+    Object.assign(state, data)
     const updateClass = async () => {
+      
       const response = await axiosInstance.put(
-        `/api/Class/UpdateClass?classId=${state.id}`,
-        {
-          title: form.values.title,
-          schoolKidIds: form.values.studentIds,
-          teacherId: form.values.teacherId,
-          schoolKids: [],
-        }
+        `/api/Class/UpdateClass?classJson=${JSON.stringify(state)}`,
+        { headers: { authorization: `Bearer ${token}` } }
       );
 
       if (response.data.statusCode === 200) {
@@ -153,10 +159,9 @@ export const ClassesPage = () => {
           message: "Информация обновлена",
           color: "teal",
         });
-        console.log(response)
         setClasses((prev: any[]) =>
           prev.map((obj) => {
-            if (obj.id === response.data.data.id)
+            if (obj.id === response.data.data.Id)
               return { ...obj, ...response.data.data };
             return obj;
           })
@@ -177,28 +182,28 @@ export const ClassesPage = () => {
           label="Наименование"
           placeholder="Наименование"
           data-autofocus
-          value={form.values.title}
+          value={form.values.Title}
           onChange={(event) =>
-            form.setFieldValue("title", event.currentTarget.value)
+            form.setFieldValue("Title", event.currentTarget.value)
           }
         />
         <Select
           label="Учитель"
           data={teachers.map((teacher: any) => ({
-            value: teacher.id,
-            label: teacher.name,
+            value: teacher.Id,
+            label: teacher.Name,
           }))}
-          value={form.values.teacherId}
-          onChange={(value: string) => form.setFieldValue("teacherId", value)}
+          value={form.values.TeacherId}
+          onChange={(value: string) => form.setFieldValue("TeacherId", value)}
         />
         <MultiSelect
           label="Ученики"
           data={students.map((student: any) => ({
-            value: student.id,
-            label: student.name,
+            value: student.Id,
+            label: student.Name,
           }))}
-          value={form.values.studentIds}
-          onChange={(values) => form.setFieldValue("studentIds", values)}
+          value={form.values.StudentIds}
+          onChange={(values) => form.setFieldValue("StudentIds", values)}
         />
         <Button type="submit" fullWidth mt="md">
           Обновить
@@ -208,6 +213,7 @@ export const ClassesPage = () => {
   };
 
   const deleteClass = async (classId: string) => {
+
     const response = await axiosInstance.delete("/api/Class/DeleteClasses", {
       data: [classId],
       headers: { authorization: `Bearer ${token}` },
@@ -220,7 +226,7 @@ export const ClassesPage = () => {
         color: "teal",
       });
 
-      setClasses(classes.filter((cl) => cl.id !== classId));
+      setClasses(classes.filter((cl) => cl.Id !== classId));
 
       closeAllModals();
     } else {
@@ -254,22 +260,23 @@ export const ClassesPage = () => {
         highlightOnHover
         fetching={fetching}
         columns={[
-          { accessor: "title", title: "№" },
+          { accessor: "Title", title: "№" },
           {
-            accessor: "teacherId",
+            accessor: "TeacherId",
             title: "Учитель",
             width: 400,
             render: (record) => {
+              record=(record)
               return (
-                teachers.find((teacher: any) => teacher.id === record.teacherId)
-                  ?.name || "-"
+                teachers.find((teacher: any) => teacher.Id === record.TeacherId)
+                  ?.Name || "-"
               );
             },
           },
           {
-            accessor: "schoolKids",
+            accessor: "SchoolKidIds",
             title: "Кол-во учеников",
-            render: (record) => record.schoolKidIds?.length,
+            render: (record) => record.SchoolKidIds?.length,
           },
           {
             accessor: "actions",
@@ -293,7 +300,7 @@ export const ClassesPage = () => {
                   color="red"
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteClass(record.id);
+                    deleteClass(record.Id);
                   }}
                 >
                   <IconTrash size={16} />

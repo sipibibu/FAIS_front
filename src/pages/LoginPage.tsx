@@ -31,6 +31,7 @@ export const LoginPage = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log(form.values.login,form.values.password)
       const data = await axiosInstance.post(
         "/api/Account/Login",
         { login: form.values.login, password: form.values.password },

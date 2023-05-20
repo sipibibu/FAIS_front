@@ -11,7 +11,7 @@ const useStyles = createStyles((theme) => ({
     color: theme.colorScheme === 'dark' ? theme.colors.dark[3] : theme.colors.gray[5],
   },
 
-  name: {
+  Name: {
     fontFamily: `Greycliff CF, ${theme.fontFamily}`,
   },
 }));
@@ -27,28 +27,26 @@ function MoneyAccount({ balance }: { balance: number }) {
   );
 }
 
-export function AccountPage({ avatar, name, title, phone, email }: any) {
+export function AccountPage({ avatar, Name, title, phone, email }: any) {
+  
   const { classes } = useStyles();
   const token = localStorage.getItem("token")!;
   const user: any = jwtDecode(token);
+  console.log(user)
   const [user_info, setuser_info] = useState<any[]>([]);
-  const [kids, setKids] = useState<any[]>([]);
+  const [kIds, setKIds] = useState<any[]>([]);
   useEffect(() => {
-        const Rofl = async () => {///GetTrustesSchoolKids
-            const data = await axiosInstance.get("/api/Account/GetTrustees", {
+        const Rofl = async () => {///GetTrustesSchoolKIds
+            const result = await axiosInstance.get(`/api/Account/GetPerson?personId=${user.personId}`, {
                 headers: { authorization: `Bearer ${token}` },
               });
-            const result = await axiosInstance.get(
-              `/api/Account/GetTrustesSchoolKids?trusteeId=${user.id}`
-            );
-        
-            setKids(result.data.data.filter((x: any) => x));
-            setuser_info(data.data.data);
+            let parse_result=JSON.parse(result.data.data)
+              console.log(parse_result)
+            setKIds(parse_result.SchoolKids.filter((x: any) => x));
+            setuser_info(parse_result);
           };
           Rofl();
       }, []);
-      console.log(kids)
-      console.log(user_info)
       
       return (
         <>
@@ -62,8 +60,8 @@ export function AccountPage({ avatar, name, title, phone, email }: any) {
               {title}
             </Text>
           
-            <Text fz="xl" fw={500} className={classes.name}>
-              {user_info[0]?.name} 
+            <Text fz="xl" fw={500} className={classes.Name}>
+              {user_info[0]?.Name} 
             </Text>
 
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
@@ -94,10 +92,10 @@ export function AccountPage({ avatar, name, title, phone, email }: any) {
           Дети
         </Text>
     
-        {kids.map((kid) => (
-          <div key={kid.id}>
-            <Text fz="lg" fw={500} className={classes.name}>
-              {kid.name}
+        {kIds.map((kId) => (
+          <div key={kId.Id}>
+            <Text fz="lg" fw={500} className={classes.Name}>
+              {kId.Name}
             </Text>
           </div>
         ))}
@@ -125,8 +123,8 @@ export function AccountPage({ avatar, name, title, phone, email }: any) {
 //    console.log(user_info)
 //    return (
 //      <>
-//        <div>{user_info[0]?.name}</div>
-//        <div>{user_info[0]?.schoolKidIds}</div>
+//        <div>{user_info[0]?.Name}</div>
+//        <div>{user_info[0]?.schoolKIdIds}</div>
 //      </>
 //    );
 //

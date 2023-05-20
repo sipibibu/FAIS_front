@@ -30,77 +30,88 @@ import { userAtom } from "../store";
 import { Calendar } from "@mantine/dates";
 
 interface AccordionLabelProps {
-  title: string;
-  description: string;
+  Title: string;
+  Description: string;
 }
 
-const AccordionLabel = ({ title, description }: AccordionLabelProps) => {
+const AccordionLabel = ({ Title, Description }: AccordionLabelProps) => {
   return (
     <Group>
       <div>
-        <Text>{title}</Text>
+        <Text>{Title}</Text>
         <Text size="sm" color="dimmed" weight={400}>
-          {description.slice(0, 100)}
-          {description.length > 100 ? "..." : ""}
+          {Description.slice(0, 100)}
+          {Description.length > 100 ? "..." : ""}
         </Text>
       </div>
     </Group>
   );
 };
 
-interface AddDishesProps {
-  menu: IMenu;
-}
 
-const UpdateMenuModal = ({ menu }: AddDishesProps) => {
-  const [dishes, setDishes] = useState([]);
+
+const UpdateMenuModal = ({ menus,menu,menus_copy }: any) => {
+  const [Dishes, setDishes] = useState([]);
   const token = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchDishes = async () => {
       const result = await axiosInstance.get("/api/Dishes", {
         headers: { authorization: `Bearer ${token}` },
       });
+      const parse_data = result.data.data.map((qwe: string)  => JSON.parse(qwe));
       setDishes(
-        result.data.map((dish: IDish) => ({
-          value: dish.id,
-          label: dish.title,
+        parse_data.map((dish: any) => ({
+          value: dish.Id,
+          label: dish.Title,
+          price: dish.Price
         }))
       );
+
     };
     fetchDishes();
+    
   }, []);
-
+  
   const form = useForm({
     initialValues: {
-      title: menu.title,
-      description: menu.description,
-      timeToService: menu.timeToService.toString(),
-      dishIds: menu.dishes?.map((dish: IDish) => dish.id),
+      Title: menu.Title,
+      Description: menu.Description,
+      TimeToService: menu.TimeToService.toString(),
+      DishesIds: menu.DishesIds,
     },
   });
+  console.log(form.values)
+  let data={
+          Id: menu.Id,
+          Title: form.values.Title,
+          Description: form.values.Description,
+          TimeToService: +form.values.TimeToService,
+          DishesIds: form.values.DishesIds,
+          $type:'Menu'
+  }
 
+  
+  const updatedMenuArray = menus_copy.map((menuObject: { Id: any; }) => {
+    if (menuObject.Id === data.Id) {
+      return data;
+    } else {
+      return menuObject;
+    }
+  });
+  menus[1](updatedMenuArray)//Прокинул прос от Menupage->AccordionControl->deleteMenu. Думаю кринж,но работает)
+  
   const updateMenu = async () => {
+
     const result: AxiosResponse = await axiosInstance.put(
-      `/api/Menu/${menu.id}`,
-      {
-        menu: {
-          title: form.values.title,
-          description: form.values.description,
-          timeToService: +form.values.timeToService,
-          dishes: [],
-        },
-        dishIds: form.values.dishIds,
-      },
+      `/api/Menu/?jsonObj=${JSON.stringify(data)}`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     );
-
     if (result.status === 200) {
-      console.log(menu)
       showNotification({
         title: "Успешно",
         message: "Меню обновлено",
@@ -117,7 +128,7 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
     }
 
   };
-
+  
   const time = [
     {
       value: "0",
@@ -126,39 +137,40 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
     { value: "1", label: "Обед" },
     { value: "2", label: "Ужин" },
   ];
-
   return (
     <form onSubmit={form.onSubmit(updateMenu)}>
       <TextInput
         label="Название"
         placeholder="Название"
         data-autofocus
-        value={form.values.title}
+        value={form.values.Title}
         onChange={(event) =>
-          form.setFieldValue("title", event.currentTarget.value)
+          form.setFieldValue("Title", event.currentTarget.value)
         }
       />
       <Textarea
         label="Описание"
         placeholder="Описание"
-        value={form.values.description}
+        value={form.values.Description}
         onChange={(event) =>
-          form.setFieldValue("description", event.currentTarget.value)
+          form.setFieldValue("Description", event.currentTarget.value)
         }
       />
       <Select
         label="Время подачи"
         defaultValue="0"
         data={time}
-        value={form.values.timeToService}
-        onChange={(value: string) => form.setFieldValue("timeToService", value)}
+        value={form.values.TimeToService}
+        onChange={(value: string) => form.setFieldValue("TimeToService", value)}
       />
       <MultiSelect
         label="Блюда"
-        data={dishes}
-        value={form.values.dishIds}
-        defaultValue={menu.dishes.map((dish: IDish) => dish.id)}
-        onChange={(values) => form.setFieldValue("dishIds", values)}
+        data={Dishes}
+        value={form.values.DishesIds}
+        
+        onChange={(values) => {
+          console.log(form.values.DishesIds)
+          form.setFieldValue("DishesIds", values)}}
       />
       <Button
         type="submit"
@@ -173,7 +185,7 @@ const UpdateMenuModal = ({ menu }: AddDishesProps) => {
 };
 
 const deleteMenu = async (menuId: string,menus:any) => {
-  menus[1]([...menus[0].filter((menu:any) => menu.id !== menuId)])//Прокинул прос от Menupage->AccordionControl->deleteMenu. Думаю кринж,но работает)
+  menus[1]([...menus[0].filter((menu:any) => menu.Id !== menuId)])//Прокинул прос от Menupage->AccordionControl->deleteMenu. Думаю кринж,но работает)
   const token = localStorage.getItem("token");
   const result: AxiosResponse = await axiosInstance.delete(
     `/api/Menu/${menuId}`,
@@ -185,7 +197,7 @@ const deleteMenu = async (menuId: string,menus:any) => {
   );
 
   if (result.status === 200) {
-    //Сделать удалениеsetDishes(dishes.filter((dish) => dish.id !== id));
+    //Сделать удалениеsetDishes(Dishes.filter((dish) => dish.Id !== Id));
     showNotification({
       title: "Успешно",
       message: "Меню удалено",
@@ -209,33 +221,46 @@ interface CreateOrderModalProps {
 const CreateOrderModal = ({ menu }: CreateOrderModalProps) => {
   const user: any = useRecoilValue(userAtom);
   const [kids, setKids] = useState([]);
+  const [Dishes, setDishes] = useState<any[]>([]);
+  const token: string | null = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchKids = async () => {
-      const data = await axiosInstance.get(
-        `/api/Account/GetTrustesSchoolKids?trusteeId=${user.id}`
+      const response = await axiosInstance.get(
+        `/api/Account/GetPerson?personId=${user.personId}`
       );
+        const response_parse=JSON.parse(response.data.data).SchoolKids
+      setKids(response_parse.filter((x: any) => x));
 
-      setKids(data.data.data.filter((x: any) => x));
+      const result_d = await axiosInstance.get("/api/Dishes", {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const parse_data = result_d.data.data.map((qwe: string)  => JSON.parse(qwe));
+      setDishes(parse_data)
+
     };
     fetchKids();
   }, []);
 
   const form = useForm({
     initialValues: {
-      dishes: [] as string[],
+      DishesIds: [] as string[],
       studentId: "",
       dates: [] as Date[],
     },
   });
 
+  let asd={
+    MenuId: menu.Id,
+    SchoolKidId: form.values.studentId,
+    DishesIds: form.values.DishesIds,
+    dates: form.values.dates.map((date) => new Date(date).getTime()),
+    $type:"Order"
+    }
   const createOrder = async () => {
-    const data = await axiosInstance.post("/api/Menu/CreateOrder", {
-      menuId: menu.id,
-      schoolKidId: form.values.studentId,
-      dishIds: form.values.dishes,
-      dates: form.values.dates.map((date) => new Date(date).getTime()),
-    });
+    const data = await axiosInstance.post(`/Post?orderJson=${JSON.stringify(asd)}`, {},
+    { headers: { authorization: `Bearer ${token}` } }
+    );
     if (data.status === 200) {
       showNotification({
         title: "Успешно",
@@ -252,30 +277,32 @@ const CreateOrderModal = ({ menu }: CreateOrderModalProps) => {
       });
     }
   };
-
+  //?.map((dish: any) => (
+   // Dishes.filter((dishes:any) => dishes.Id === dish)
+   // .map((dishes:any) => ({label: dishes.Title, value: dishes.Id}))
+   // ))
   return (
     <form onSubmit={form.onSubmit(createOrder)}>
       <Select
         label="Ребёнок"
         value={form.values.studentId}
         onChange={(value: string) => form.setFieldValue("studentId", value)}
-        data={kids.filter(x => x).map((kid: any) => ({ label: kid.name, value: kid.id }))}
+        data={kids.filter(x => x).map((kid: any) => ({ label: kid.Name, value: kid.Id }))}
       />
       <MultiSelect
-        label="Блюда"
-        data={menu.dishes.map((dish: IDish) => ({
-          label: dish.title,
-          value: dish.id,
-        }))}
-        value={form.values.dishes}
-        onChange={(values) => form.setFieldValue("dishes", values)}
-      />
+  label="Блюда"
+  value={form.values.DishesIds}
+  onChange={(value) => {form.setFieldValue("DishesIds", value)}}
+  data={menu.DishesIds?.map((dish: any) => {
+    const selectedDish = Dishes.find((dishes:any) => dishes.Id === dish);
+    return selectedDish ? {label: selectedDish.Title, value: selectedDish.Id} : null;
+  }).filter((dish: any) => dish !== null)}
+/>
       <Center>
         <Calendar
           multiple
           value={form.values.dates}
           onChange={(e) => {
-            console.log(e);
             form.setFieldValue("dates", e);
           }}
         />
@@ -293,7 +320,7 @@ const CreateOrderModal = ({ menu }: CreateOrderModalProps) => {
   );
 };
 
-const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:any}) => {
+const AccordionControl = (props: AccordionControlProps & { menu: any ,menus:any,menus_copy:any}) => {
   const user: any = useRecoilValue(userAtom);
 
   return (
@@ -312,7 +339,7 @@ const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:an
                 onClick={() =>
                   openModal({
                     title: "Редактирование меню",
-                    children: <UpdateMenuModal menu={props.menu} />,
+                    children: <UpdateMenuModal menu={props.menu} menus={props.menus} menus_copy={props.menus_copy} />,
                   })
                 }
                 icon={<IconEdit />}
@@ -320,7 +347,7 @@ const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:an
                 Редактировать
               </Menu.Item>
               <Menu.Item
-                onClick={() => deleteMenu(props.menu.id,props.menus)}
+                onClick={() => deleteMenu(props.menu.Id,props.menus)}
                 color="red"
                 icon={<IconTrash />}
               >
@@ -328,7 +355,7 @@ const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:an
               </Menu.Item>
             </>
           )}
-          {user.role === "trustee" && (
+          {user.role === "parent" && (
             <Menu.Item
               onClick={() =>
                 openModal({
@@ -350,6 +377,7 @@ const AccordionControl = (props: AccordionControlProps & { menu: IMenu ,menus:an
 export const MenusPage = () => {
   const [menus, setMenus] = useState<IMenu[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [Dishes, setDishes] = useState([]);
   const user: any = useRecoilValue(userAtom);
   const navigate = useNavigate();
   const token: string | null = localStorage.getItem("token");
@@ -361,36 +389,52 @@ export const MenusPage = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMenus([...result.data.data]); //ошибка при пустом спимке меню, но работатет)
+      const result_d = await axiosInstance.get("/api/Dishes", {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const parse_data = result_d.data.data.map((qwe: string)  => JSON.parse(qwe));
+      setDishes(parse_data)
+      let menu_parse = JSON.parse(result.data.data)
+      .filter((item:any) => item.$type !== "BuffetMenu")//Пока оставляем вместо с остальными меню, но уберём в отдельную вкалдку.
+       .map((qwe: string) => qwe);
+      setMenus([...menu_parse]); //ошибка при пустом спимке меню, но работатет)
       setFetching(false);
     };
     fetchData();
   }, []);
-  //console.log(menus)
+  let menis_copy=menus
   const items =
     menus &&
-    menus.map((menu: IMenu) => (
-      <Accordion.Item value={menu.id} key={menu.id}>
-        <AccordionControl menu={menu} menus={[menus, setMenus]}>
+    menus.map((menu: any) => (
+      <Accordion.Item value={menu?.Id} key={menu?.Id}>
+        <AccordionControl menu={menu} menus_copy={menis_copy} menus={[menus, setMenus]}>
           <AccordionLabel {...menu} />
         </AccordionControl>
 
         <Accordion.Panel>
           <Box>
-            {menu.dishes?.map((dish: IDish) => (
+            {menu.DishesIds?.map((dish: any) => (
               <NavLink
-                key={dish.id}
+                key={dish?.Id}
                 label={
                   <Group position="apart">
-                    {dish.title}
+                    {
+                    Dishes
+                    .filter((dishes:any) => dishes.Id === dish)
+                    .map((dishes:any) => dishes.Title)
+                    }
                     <Badge color="green" variant="light">
-                      {dish.price}₽
+                      {
+                      Dishes
+                      .filter((dishes:any) => dishes.Id === dish) 
+                      .map((dishes:any) => dishes.Price)
+                      }₽
                     </Badge>
                   </Group>
                 }
                 onClick={() =>
                   (user.role === "admin" || user.role === "canteenEmployee") &&
-                  navigate(`/dishes/${dish.id}`)
+                  navigate(`/Dishes/${dish.Id}`)
                 }
               />
             ))}
@@ -402,25 +446,30 @@ export const MenusPage = () => {
   const FormModal = () => {
     const form = useForm({
       initialValues: {
-        title: "",
-        description: "",
-        timeToService: "0",
+        Title: "",
+        Description: "",
+        TimeToService: "0",
       },
     });
 
+    let data={
+         Title: form.values.Title,
+         Description: form.values.Description,
+         TimeToService: +form.values.TimeToService,
+         $type:"Menu"
+        }
+    
+    
     const createMenu = async () => {
+      console.log(JSON.stringify(data))
+
       const result: AxiosResponse = await axiosInstance.post(
-        "/api/Menu",
-        {
-          title: form.values.title,
-          description: form.values.description,
-          timeToService: +form.values.timeToService,
-        },
+        `/api/Menu?jsonObj=${JSON.stringify(data)}`,
+        {},
         { headers: { authorization: `Bearer ${token}` } }
       );
-
       if (result.status === 200) {
-        setMenus([...menus, result.data.data])
+        setMenus([...menus, JSON.parse(result.data.data)])
         showNotification({
           title: "Успешно",
           message: "Меню создано",
@@ -452,26 +501,26 @@ export const MenusPage = () => {
           label="Название"
           placeholder="Название"
           data-autofocus
-          value={form.values.title}
+          value={form.values.Title}
           onChange={(event) =>
-            form.setFieldValue("title", event.currentTarget.value)
+            form.setFieldValue("Title", event.currentTarget.value)
           }
         />
         <Textarea
           label="Описание"
           placeholder="Описание"
-          value={form.values.description}
+          value={form.values.Description}
           onChange={(event) =>
-            form.setFieldValue("description", event.currentTarget.value)
+            form.setFieldValue("Description", event.currentTarget.value)
           }
         />
         <Select
           label="Время подачи"
           defaultValue="0"
           data={time}
-          value={form.values.timeToService}
+          value={form.values.TimeToService}
           onChange={(value: string) =>
-            form.setFieldValue("timeToService", value)
+            form.setFieldValue("TimeToService", value)
           }
         />
         <Button

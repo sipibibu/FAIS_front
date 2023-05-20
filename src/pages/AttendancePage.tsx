@@ -24,33 +24,43 @@ export const AttendancePage = () => {
   const [teacherClass, setTeacherClass] = useState<any>(null);
   const [attendance, setAttendance] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
-
+  const [kid, setKid] = useState<any[]>([])
   useEffect(() => {
     const fetchClass = async () => {
       const response = await axiosInstance.get(
-        `/api/Class/GetTeachersClass?teacherId=${user.id}`,
+        `/api/Class/GetTeachersClass?teacherId=${user.personId}`,
         { headers: { authorization: `Bearer ${token}` } }
       );
-      if (response.data.data !== null)
-        setTeacherClass((d) => response.data.data);
+        
+
+      let response_parse=JSON.parse(response.data.data)
+      if (response_parse !== null)
+        setTeacherClass(response_parse);
 
       const response_s = await axiosInstance.get(
-        `/api/Attendance/GetClassAttendance?classId=${response.data.data.id}`,
+        `/api/Attendance/GetClassAttendance?classId=${JSON.parse(response.data.data).Id}`,
         { headers: { authorization: `Bearer ${token}` } }
       );
-
+      
       if (response_s.data.data !== null)
-        setAttendance((d) => response_s.data.data);
+        setAttendance(response_s.data.data);
       setFetching(false);
+
+
+      const response_kid = await axiosInstance.get("/api/Account/GetPersons?role=schoolKid", {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const response_kid_parse = response_kid.data.data.map((qwe: string)  => JSON.parse(qwe));
+      setKid(response_kid_parse)
     };
     fetchClass();
   }, []);
-
+  
   const updateAttendance = async (studentId: string, type: number) => {
     const response = await axiosInstance.put(
       `/api/Attendance/Put?id=${studentId}&attendance=${type}`
     );
-
+      
     if (response.data.statusCode === 200) {
       showNotification({
         title: "Успешно",
@@ -60,7 +70,7 @@ export const AttendancePage = () => {
 
       setAttendance((prev: any[]) => {
         const newState = prev.map((obj) => {
-          if (obj.schoolKidId === response.data.data.schoolKidId)
+          if (obj.id === response.data.data.id)
             return { ...obj, ...response.data.data };
           return obj;
         });
@@ -76,11 +86,10 @@ export const AttendancePage = () => {
       });
     }
   };
-
   return (
     <>
       <span>
-        Посещаемость {teacherClass?.title} на {new Date().toLocaleDateString()}
+        Посещаемость {teacherClass?.Title} на {new Date().toLocaleDateString()}
       </span>
       <DataTable
         withBorder
@@ -95,19 +104,19 @@ export const AttendancePage = () => {
             accessor: "name",
             title: "Имя",
             width: 400,
-            render: (record) => {
-              const cur = attendance.find(
-                (a) => a.schoolKidId === record.id
-              )?.schoolKidAttendanceType;
-              console.log(attendance);
+            render: (record:any) => {
+              const kid_name = kid.find(kid => kid.Id === record);
+              const kid_att = attendance.find(kid => kid.id == record)
+              console.log(kid_att)
+              
               return (
                 <span
                   style={{
                     color:
-                      cur === 1 ? "red" : cur === 2 ? "lightgreen" : "black",
+                    kid_att?.attendance === 1 ? "red" : kid_att?.attendance === 2 ? "lightgreen" : "black",
                   }}
                 >
-                  {record.name}
+                  {kid_name?.Name}
                 </span>
               );
             },
@@ -120,8 +129,9 @@ export const AttendancePage = () => {
                 <ActionIcon
                   color="teal"
                   onClick={(e) => {
+                    console.log(record)
                     e.stopPropagation();
-                    updateAttendance(record.id, 2);
+                    updateAttendance(record, 2);
                   }}
                 >
                   <IconCheck size={16} />
@@ -131,7 +141,7 @@ export const AttendancePage = () => {
                   color="red"
                   onClick={(e) => {
                     e.stopPropagation();
-                    updateAttendance(record.id, 1);
+                    updateAttendance(record, 1);
                   }}
                 >
                   <IconMinus size={16} />
@@ -140,7 +150,8 @@ export const AttendancePage = () => {
             ),
           },
         ]}
-        records={teacherClass?.schoolKids}
+        
+        records={teacherClass?.SchoolKidIds}
       />
     </>
   );

@@ -25,11 +25,11 @@ import FormData from "form-data";
 
 interface Props {
   dish: {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    imageId?: string;
+    Id: string;
+    Title: string;
+    Description: string;
+    Price: number;
+    ImageId?: string;
   };
   
   onDelete: (id: string) => void;
@@ -40,26 +40,26 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
   const user: any = useRecoilValue(userAtom);
   const token = localStorage.getItem("token");
   const [image, setImage] = useState("");
-
   useEffect(() => {
     const fetchImage = async () => {
       const result = await axiosInstance.get(
-        `/api/FileUpload?fileId=${dish?.imageId}`
+        `/api/FileUpload?fileId=${dish?.ImageId}`
       );
+      
       setImage(result.data.data);
     };
-    if (dish?.imageId) fetchImage();
+    if (dish?.ImageId) fetchImage();
   }, [dish]);
 
   const EditDishModal = () => {
     const [newImage, setNewImage] = useState<File | null>(null);
-    let localId: string | undefined | null = dish?.imageId;
+    let localId: string | undefined | null = dish?.ImageId;
 
     const form = useForm({
       initialValues: {
-        title: dish?.title,
-        description: dish?.description,
-        price: dish?.price,
+        Title: dish?.Title,
+        Description: dish?.Description,
+        Price: dish?.Price,
       },
     });
 
@@ -75,19 +75,19 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
           localId = imageResult.data.data;
       }
 
+      let data=({
+          Title: form.values.Title,
+          Description: form.values.Description,
+          Price: form.values.Price,
+          ImageId: localId,
+      })
+
+      Object.assign(dish, data);//dish перезаписываем dish датой с новыми данными из модального окна.
+      console.log(token)
       const result: AxiosResponse = await axiosInstance.put(
-        `/api/Dishes/${dish?.id}`,
-        {
-          title: form.values.title,
-          description: form.values.description,
-          price: form.values.price,
-          imageId: localId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/api/Dishes?dishJson=${JSON.stringify(dish)}`,
+        {},
+        {headers: { Authorization: `Bearer ${token}` }}
       );
 
       if (result.status === 200) {
@@ -114,17 +114,17 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
           label="Название"
           placeholder="Название"
           data-autofocus
-          value={form.values.title}
+          value={form.values.Title}
           onChange={(event) =>
-            form.setFieldValue("title", event.currentTarget.value)
+            form.setFieldValue("Title", event.currentTarget.value)
           }
         />
         <Textarea
           label="Описание"
           placeholder="Описание"
-          value={form.values.description}
+          value={form.values.Description}
           onChange={(event) =>
-            form.setFieldValue("description", event.currentTarget.value)
+            form.setFieldValue("Description", event.currentTarget.value)
           }
         />
         <FileInput
@@ -147,8 +147,8 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
         <NumberInput
           label="Цена"
           defaultValue={0}
-          value={form.values.price}
-          onChange={(value: number) => form.setFieldValue("price", value)}
+          value={form.values.Price}
+          onChange={(value: number) => form.setFieldValue("Price", value)}
         />
         <Button type="submit" fullWidth mt="md">
           Сохранить
@@ -157,19 +157,21 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
     );
   };
 
-  const deleteDish = async (id?: string) => {
-    
-    const result: AxiosResponse = await axiosInstance.delete(
-      `/api/Dishes/${dish?.id}`,
+  const deleteDish = async (Id?: string) => {
+
+    console.log(dish.Id)
+    const result: AxiosResponse = await axiosInstance.delete(//не удаляется
+      `/api/Dishes?id=${Id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       }
     );
-
+    
     if (result.status === 200) {
-      onDelete(dish.id)
+      
+      onDelete(dish.Id)
       showNotification({
         title: "Успешно",
         message: "Блюдо удалено",
@@ -197,14 +199,14 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
         )}
       </Card.Section>
       <Group position="apart" mt="md" mb="xs">
-        <Text weight={500}>{dish?.title}</Text>
+        <Text weight={500}>{dish?.Title}</Text>
         <Badge color="green" variant="light">
-          {dish?.price}₽
+          {dish?.Price}₽
         </Badge>
       </Group>
 
       <Text size="sm" color="dimmed">
-        {dish?.description}
+        {dish?.Description}
       </Text>
 
       {user.role === "admin" && (
@@ -225,7 +227,7 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
             Редактировать
           </Button>
           <Button
-            onClick={() => deleteDish(dish?.id)}
+            onClick={() => deleteDish(dish?.Id)}
             variant="light"
             color="red"
             fullWidth
