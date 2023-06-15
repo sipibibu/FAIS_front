@@ -1,131 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Select, MultiSelect } from '@mantine/core';
+import { Button, Select, MultiSelect,NumberInput  } from '@mantine/core';
 import { axiosInstance } from "../axios";
 import { useRecoilValue } from 'recoil';
 import { userAtom } from '../store';
-
+import { IconMinus } from '@tabler/icons-react';
 export const Calendar_p = () => {
   const [month, setMonth] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<any>(null);
   const [menus, setMenus] = useState<any[]>([]);
   const [menusChange, setMenusChange] = useState<string>('');
   const token = localStorage.getItem('token');
   const user: any = useRecoilValue(userAtom);
-  let dishes11:any = {
-    '2023-05-01': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-02': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-03': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-04': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-05': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-06': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-10': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-11': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-08': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-09': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-12': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-13': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-  };
 
-  let dishes2:any = {
-    '2023-05-01': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-02': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-03': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-04': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-    '2023-05-05': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-      { name: 'Майн' },
-      { name: 'Без картинки)' },
-    ],
-    '2023-05-06': [
-      { name: 'Суп' },
-      { name: 'Каша' },
-      { name: 'Мороженое' },
-    ],
-        
-  }
-  const [dishes1, setDishes1] = useState<any>({dishes11})
+  const [dishes1, setDishes1] = useState<any>({})
 
   const weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
   const firstDayOfMonth = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
@@ -133,11 +20,15 @@ export const Calendar_p = () => {
   const [matchingDatesColor, setMatchingDatesColor] = useState<{ [key: string]: string }>({});
   const [Dishes, setDishesData] = useState<{ value: string; label: string; price: number }[]>([]);
   const [kids, setKids] = useState([]);
-
+  const [calendar_dish, setcalendar_dish] = useState<any[]>([]);
+  const [highlightedDays, setHighlightedDays] = useState<any>({});
+  const [dishselect,setdishselect] = useState<any[]>([]);
+  const [fetchDishesTrigger, setFetchDishesTrigger] = useState(false);
   
   useEffect(() => {
-    
+
     const fetchDishes = async () => {
+
       const result = await axiosInstance.get('api/Menu', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -161,7 +52,6 @@ export const Calendar_p = () => {
       const response = await axiosInstance.get(
         `/api/Account/GetPerson?personId=${user.personId}`
       );
-      console.log(JSON.parse(response.data.data))
         const response_parse=JSON.parse(response.data.data).SchoolKids
       setKids(response_parse.filter((x: any) => x));
       }
@@ -195,9 +85,7 @@ export const Calendar_p = () => {
         for (let j = i + 1; j < dates.length; j++) {
           const compareDate = dates[j];
           const compareArray = dishes1[compareDate];
-
-          if (JSON.stringify(currentArray) === JSON.stringify(compareArray)) {
-            // Assign the same color to matching dates
+          if (currentArray.Name.slice().sort().toString() === compareArray.Name.slice().sort().toString()) {
             colors[compareDate] = colors[currentDate];
           }
         }
@@ -206,16 +94,121 @@ export const Calendar_p = () => {
     };
 
     fetchDishes();
-  }, [token,dishes1]);
+  }, [dishes1]);
 
   useEffect(() => {
-    if(menusChange=='31f9cf77-ca52-46bd-ac05-c33457bdc28c'){
-      setDishes1(dishes2)  
-    }else{
-      setDishes1(dishes11) 
+  const fetchDates = async () => {
+  const zxc = await axiosInstance.get(`api/Menu/GetDishesDates?menuId=${menusChange}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log(JSON.parse(zxc.data.data))
+
+  setcalendar_dish(JSON.parse(zxc.data.data))
+
+
+
     }
+  fetchDates();
+  }, [menusChange,fetchDishesTrigger]);
+
+
+  function convertDates(transformedDataWithDates:any) {
+    const startingPoint:any = new Date('2023-05-02');
+    const transformedData:any = {};
+
+    for (const date in transformedDataWithDates) {
+      const formattedDate = transformedDataWithDates[date].replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$2-$3-$1');
+      const currentDate:any = new Date(formattedDate);
+      const daysDiff = Math.floor((currentDate - startingPoint) / (1000 * 60 * 60 * 24));
+      const originalDate = daysDiff + 2;
+      transformedData[originalDate] = transformedDataWithDates[date];
+    }
+    return transformedData;
+  }
+
+
+  const SaveDateMenu = async ()=>{
+
+
+  let qwe:any=(Object.keys(highlightedDays))
+  setHighlightedDays('')
+
+  let dishDates:any=(Object.keys(convertDates(qwe)))
+  dishDates = dishDates.map((str:any) => parseInt(str));
+  console.log(dishDates)
   
-}, [menusChange]);
+  for (const dishId of dishselect) {
+    
+    let zxc=(findDatesByDish(dishId,dishes1))
+
+    let dishDates_qwe=zxc.concat(dishDates)
+ 
+    dishDates_qwe = dishDates_qwe.filter((value:any, index:any, self:any) => {
+      return self.indexOf(value) === index;
+    });
+    console.log(dishDates_qwe)
+
+  const rofl=await axiosInstance.put(
+    `api/Menu/SetDishDates?menuId=${menusChange}&dishId=${dishId}`,
+    dishDates_qwe,
+    {
+     headers: {
+       Authorization: `Bearer ${token}`,
+     },
+   }
+  );
+  }
+  setdishselect([])
+  setHighlightedDays('')
+  //setDishes1(dishes1,)
+  setFetchDishesTrigger((prev) => !prev)
+  }
+
+
+
+  useEffect(() => {
+  const transformedData:any = {};
+  for (const array of calendar_dish) {
+    for (const obj of array) {
+      const { Date, MenuId,Dish } = obj;
+      if (transformedData[Date]) {
+        transformedData[Date].Id.push(Dish.Id)
+        transformedData[Date].Name.push(Dish.Title);
+        transformedData[Date].MenuIds.push(MenuId);
+      } else {
+        transformedData[Date] = {
+          Date:Date,
+          Id:[Dish.Id],
+          Name:[Dish.Title],
+          MenuIds: [MenuId]
+        };
+      }
+    }
+  }
+
+  const startingPoint:any = new Date('2023-05-02');
+  const transformedDataWithDates:any = {};
+  for (const date in transformedData) {
+    const daysToAdd = parseInt(date) - 1;
+    const currentDate:any = new Date(startingPoint);
+    currentDate.setDate(currentDate.getDate() + daysToAdd);
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    transformedDataWithDates[formattedDate] = transformedData[date];
+  }
+
+
+
+
+  setDishes1(transformedDataWithDates)
+  }, [calendar_dish]);
+
+  
+
 
   const handlePrevMonthClick = () => {
     setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1));
@@ -228,18 +221,74 @@ export const Calendar_p = () => {
   };
 
   const handleDayClick = (day: string) => {
+    {(user.role === "admin" || user.role === "canteenEmployee") && (
+    setHighlightedDays((prevHighlightedDays:any) => {
+      if (prevHighlightedDays[day]) {
+        const { [day]: _, ...updatedHighlightedDays } = prevHighlightedDays;
+        return updatedHighlightedDays;
+      } else {
+        return { ...prevHighlightedDays, [day]: 'red' };
+      }
+    }))}
     setSelectedDay(day);
   };
 
+  function findDatesByDish(dishId:any, data:any) {
+    const dates = [];
+    for (const date in data) {
+      if (data.hasOwnProperty(date)) {
+        const dishIds = data[date];
+        if (dishIds.Id.includes(dishId)) {
+          dates.push(data[date].Date);
+        }
+      }
+    }
+    
+    return dates;
+  }
+
+
+  const deleteDish = async (dishId:any)=>{
+    let qwe:any=(Object.keys(highlightedDays))
+    let dishDates:any=(Object.keys(convertDates(qwe)))
+    dishDates = dishDates.map((str:any) => parseInt(str));
+    console.log(dishDates)
+
+    let zxc=(findDatesByDish(dishId,dishes1))
+    let ustal=(zxc.filter((number) => !dishDates.includes(number)))
+    await axiosInstance.put(
+      `api/Menu/SetDishDates?menuId=${menusChange}&dishId=${dishId}`,
+      ustal,
+      {
+       headers: {
+         Authorization: `Bearer ${token}`,
+       },
+     }
+    );
+    setFetchDishesTrigger((prev) => !prev)
+  }
+
   const dishesForSelectedDay = selectedDay && dishes1[selectedDay];
+
+
+  
+
   return (
     <div style={{ display: 'flex' }}>
       <div style={{ flex: '1' }}>
         <h1>{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', marginLeft: '10px' }}>
         <Button onClick={handlePrevMonthClick}>Назад</Button>
-        <Button style={{ marginLeft: '10px' }} onClick={handleNextMonthClick}>
-          Вперёд
-        </Button>
+        <Button style={{ marginLeft: '10px' }} onClick={handleNextMonthClick}>Вперёд</Button>
+        {(user.role === "parent") && (
+          <NumberInput
+          style={{ marginLeft: '10px', paddingBottom:'20px' }}
+            defaultValue={18}
+            placeholder="Продлеваем на"
+            label="Продлеваем на"
+          />
+        )}
+      </div>
         <Select
           label="Выбор Меню"
           placeholder="Нажми"
@@ -267,6 +316,8 @@ export const Calendar_p = () => {
                     .toString()
                     .padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                   const backgroundColor = matchingDatesColor[date] || 'white';
+                  const borderColor = highlightedDays[date] || '#cccc';
+
                   const cellWidth = 100 / 7;
 
                   return (
@@ -276,7 +327,7 @@ export const Calendar_p = () => {
                         padding: '45px',
                         width: `${cellWidth}%`,
                         height: '100px',
-                        border: '1px solid #ccc',
+                        border: `2px solid ${borderColor}`,
                         borderRadius: '5px',
                         backgroundColor: backgroundColor,
                         cursor: 'pointer',
@@ -298,7 +349,7 @@ export const Calendar_p = () => {
       {(user.role === "parent") && (
         <>
             <Select
-            style={{width: '200px'}}
+            style={{width: '200px', paddingTop:'50px'}}
             label="Выбор ребёнка"
             placeholder="Нажми"
             data={kids.filter(x => x).map((kid: any) => ({ label: kid.Name, value: kid.Id }))}
@@ -306,9 +357,7 @@ export const Calendar_p = () => {
           <Button style={{width: '200px'}} onClick={()=>console.log('Успешно,но ждём')}>Сохранить</Button>
           </>
           )}
-        {dishesForSelectedDay && (
-          <div>
-            {(user.role === "admin" || user.role === "canteenEmployee") && (
+                      {(user.role === "admin" || user.role === "canteenEmployee") && (
               <>
             <MultiSelect
               label="Блюда"
@@ -320,13 +369,19 @@ export const Calendar_p = () => {
                 })
                 .filter((dish: any) => dish !== null))||[]}
               onChange={(values) => {
-                // form.setFieldValue("DishesIds", values)
+                setdishselect(values)
               }}
             />
-                <Button style={{width: '200px'}} onClick={()=>console.log('Успешно,но ждём')}>Сохранить</Button>
+                <Button style={{width: '200px'}} 
+                onClick={
+                  SaveDateMenu
+                  }>Сохранить</Button>
               </>
           )}
-            <h2 style={{ width: '200px' }}>{`Блюдо на дату ${selectedDay}`}</h2>
+        {dishesForSelectedDay && (
+          <div>
+
+            <h2 style={{ width: '200px' }}>{`Блюда на дату ${selectedDay}`}</h2>
             <table>
               <thead>
                 <tr>
@@ -334,11 +389,17 @@ export const Calendar_p = () => {
                 </tr>
               </thead>
               <tbody>
-                {dishesForSelectedDay?.map((dish: any) => (
-                  <tr key={dish.name}>
-                    <td>{dish.name}</td>
-                  </tr>
-                ))}
+              {dishesForSelectedDay.Name?.map((dish: any, index: number) => (
+  <tr key={dish}>
+    <td>{dish}</td>
+    {(user.role === "admin" || user.role === "canteenEmployee") && (
+    <IconMinus
+      onClick={() => deleteDish(dishesForSelectedDay.Id[index])} // Pass the dish ID to deleteDish
+      style={{ color: 'red', paddingTop: '5px' }}
+    />)}
+  </tr>
+))}
+
               </tbody>
             </table>
           </div>

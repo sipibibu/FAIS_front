@@ -80,10 +80,11 @@ export const DishComponent: React.FC<Props> = ({ dish, onDelete, onSave }) => {
           Description: form.values.Description,
           Price: form.values.Price,
           ImageId: localId,
+          $type:'Dish'
       })
 
       Object.assign(dish, data);//dish перезаписываем dish датой с новыми данными из модального окна.
-      console.log(token)
+      console.log(dish)
       const result: AxiosResponse = await axiosInstance.put(
         `/api/Dishes?dishJson=${JSON.stringify(dish)}`,
         {},

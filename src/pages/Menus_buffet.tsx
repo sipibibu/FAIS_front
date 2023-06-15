@@ -209,7 +209,7 @@ const Create_buffet_menu = async() =>{
             menu.DishesIds?.map((dish: any) => (console.log(menu))))
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", }}>
+    <div style={{ display: "flex", alignItems: "flex-start"}}>
 
     <Modal 
     opened={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -222,8 +222,10 @@ const Create_buffet_menu = async() =>{
           form.setFieldValue("DishesIds", values)
         }}
       />
-      <Button onClick={handleSave}>Save</Button>
+      <div  style={{marginTop:'20px'}}>
+      <Button style={{marginRight:'5px'}} onClick={handleSave}>Save</Button>
       <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+      </div>
     </Modal>
 
       <div className="Cards"  style={{ flex: 1, display: "flex", flexWrap: "wrap" }}>

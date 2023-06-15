@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { MenusPage, LoginPage, DishPage } from "./pages";
+import { MenusPage, LoginPage } from "./pages";
 import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
 import { MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
@@ -36,7 +36,6 @@ function App() {
                   <Route path="account" element={<AccountPage />} />
                   <Route path="menus" element={<MenusPage />} />
                   <Route path="dishes" element={<DishesPage />} />
-                  <Route path="dishes/:dishId" element={<DishPage />} />
                   <Route path="teachers" element={<TeachersPage />} />
                   <Route path="classes" element={<ClassesPage />} />
                   <Route path="parents" element={<ParentsPage />} />

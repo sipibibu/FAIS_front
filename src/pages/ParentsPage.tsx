@@ -48,17 +48,21 @@ export const ParentsPage = () => {
     }));
   };
 
+
   const deleteParent = async (parentId: string) => {
-    console.log(parentId)
+    
     const response = await axiosInstance.delete(`/api/Account/DeletePerson?personId=${parentId}`,
     { headers: { authorization: `Bearer ${token}` } })
     
+   const response_parse=JSON.parse(response.data.data)
+   
     if (response.data.statusCode === 200) {
       showNotification({
         title: "Успешно",
         message: `Родитель удален`,
         color: "teal",
       });
+
       setParents(parents.filter((s: any) => s.Id !== parentId));
       closeAllModals();
     } else {
