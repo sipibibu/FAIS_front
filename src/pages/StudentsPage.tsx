@@ -11,21 +11,37 @@ export const StudentsPage = () => {
   const token: string | null = localStorage.getItem("token");
   const [students, setStudents] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true)
+  const [userData, setUserData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStudents = async () => {
-      const data = await axiosInstance.get("/api/Account/GetSchoolKids", {
+      const response = await axiosInstance.get("/api/Account/GetPersons?role=schoolKid", {
         headers: { authorization: `Bearer ${token}` },
       });
-      setStudents(data.data.data);
+      const parse_data = response.data.data.map((qwe: string)  => JSON.parse(qwe));
+
+      setStudents(parse_data);
       setFetching(false)
     };
-
+    
     fetchStudents();
   }, []);
 
+  const handleButtonClick = async (record: { UserId: any; }) => {
+    const result = await axiosInstance.get(
+      `/api/Account/GetUser?userId=${record.UserId}`,
+      { headers: { authorization: `Bearer ${token}` } }
+    );
+    setUserData((prevState) => ({
+      ...prevState,
+      [record.UserId]: JSON.parse(result.data.data),
+    }));
+  };
+
+
   const deleteStudent = async (studentId: string) => {
-    const data = await axiosInstance.delete(`/api/Account/DeleteSchoolKid?id=${studentId}`, { headers: { authorization: `Bearer ${token}` } })
+    const data = await axiosInstance.delete(`/api/Account/DeletePerson?personId=${studentId}`,
+     { headers: { authorization: `Bearer ${token}` } })
 
     if (data.data.statusCode === 200) {
       showNotification({
@@ -33,8 +49,7 @@ export const StudentsPage = () => {
         message: `Ученик удален`,
         color: "teal",
       });
-
-      setStudents((old) => old.filter((s: any) => s.id !== studentId));
+      setStudents(students.filter(s => s.Id !== studentId));
 
       closeAllModals();
     } else {
@@ -49,24 +64,33 @@ export const StudentsPage = () => {
   const CreateStudentModal = () => {
     const form = useForm({
       initialValues: {
-        name: "",
+        Name: "",
       },
     });
 
     const createStudent = async () => {
-      const data = await axiosInstance.post(
-        `/api/Account/CreateSchoolKid?name=${form.values.name}`,
+      const result = await axiosInstance.post(
+        "/api/Account/Register",
         {
+          Name: form.values.Name,
           role: "schoolKid",
         },
         { headers: { authorization: `Bearer ${token}` } }
       );
-      if (data.status === 200) {
-        console.log(data)
-        setStudents([...students, data.data.data])
+
+      let schoolKid_reg=JSON.parse(result.data.data)
+      let schoolKid_data=JSON.parse(result.data.data).Person  
+      delete schoolKid_reg['Person'] 
+      schoolKid_reg['UserId']=schoolKid_reg['Id']
+      delete schoolKid_reg['Id']
+      delete schoolKid_data['UserId']
+      Object.assign(schoolKid_reg, schoolKid_data)
+      if (result.status === 200) {
+        setStudents([...students, schoolKid_reg])
+        
         showNotification({
           title: "Успешно",
-          message: "Ученик создан",
+          message: `Данные для входа: ${schoolKid_reg.Login}:${schoolKid_reg.Password} `,
           color: "teal",
         });
 
@@ -79,16 +103,16 @@ export const StudentsPage = () => {
         });
       }
     };
-
+console.log([...students])
     return (
       <form onSubmit={form.onSubmit(createStudent)}>
         <TextInput
           label="Имя"
           placeholder="Имя"
           data-autofocus
-          value={form.values.name}
+          value={form.values.Name}
           onChange={(event) =>
-            form.setFieldValue("name", event.currentTarget.value)
+            form.setFieldValue("Name", event.currentTarget.value)
           }
         />
         <Button type="submit" fullWidth mt="md">
@@ -101,24 +125,46 @@ export const StudentsPage = () => {
   const UpdateStudentModal = (props: any) => {
     const form = useForm({
       initialValues: {
-        name: props.student.name,
+        Name: props.student.Name,
+        Login: userData[props.student.UserId]?.Login || '',
+        Password: userData[props.student.UserId]?.Password || '',
       },
     });
 
+    let data={
+      $type:"SchoolKid",
+      Name: form.values.Name,
+    }
+
+
+    Object.assign(props.student,data)
+
+
+
     const updateStudent = async () => {
+
+
       const result = await axiosInstance.put(
-        `/api/Account/UpdateSchoolKid?id=${props.student.id}`,
-        {
-          name: form.values.name,
-        },
+        `/api/Account/UpdatePerson?person=${JSON.stringify(props.student)}`,
         { headers: { authorization: `Bearer ${token}` } }
       );
 
+
+      let student_data=JSON.parse(result.data.data)
+
+      const result_log = await axiosInstance.put(
+        `/api/Account/UpdateUserLogin?userId=${props.student.UserId}&login=${form.values.Login}`,
+        { headers: { authorization: `Bearer ${token}` } }
+      );
+      const result_pas = await axiosInstance.put(
+       `/api/Account/UpdateUserPassword?userId=${props.student.UserId}&password=${form.values.Password}`,
+       { headers: { authorization: `Bearer ${token}` } }
+      );
+
+
       if (result.data.statusCode === 200) {
-        console.log(students)
-        console.log(result.data.data)
-        let index_element=students.findIndex(student=>student.id ==result.data.data.id)
-        students[index_element]=result.data.data
+        let index_element=students.findIndex(student=>student.id ==student_data.Id)
+        students[index_element]=student_data
         setStudents([...students])
         showNotification({
           title: "Успешно",
@@ -135,6 +181,7 @@ export const StudentsPage = () => {
           color: "red",
         });
       }
+
     };
 
     return (
@@ -143,9 +190,27 @@ export const StudentsPage = () => {
           label="Имя"
           placeholder="Имя"
           data-autofocus
-          value={form.values.name}
+          value={form.values.Name}
           onChange={(event) =>
-            form.setFieldValue("name", event.currentTarget.value)
+            form.setFieldValue("Name", event.currentTarget.value)
+          }
+        />
+        <TextInput
+          label="Логин"
+          placeholder="Логин"
+          data-autofocus
+          value={form.values.Login}
+          onChange={(event) =>
+            form.setFieldValue("Login", event.currentTarget.value)
+          }
+        />
+        <TextInput
+          label="Пароль"
+          placeholder="Пароль"
+          data-autofocus
+          value={form.values.Password}
+          onChange={(event) =>
+            form.setFieldValue("Password", event.currentTarget.value)
           }
         />
         <Button
@@ -182,19 +247,25 @@ export const StudentsPage = () => {
         highlightOnHover
         fetching={fetching}
         columns={[
-          // { accessor: "id", title: "ID" },
+          { accessor: "login_pasword", width: 200, title: "login/pasword",render: (record)=>
+          <>
+           {userData[record.UserId] ? (
+             <div>Логин: {JSON.stringify(userData[record.UserId].Login)} Пароль: {JSON.stringify(userData[record.UserId].Password)} </div>
+           ) : (
+             <Button onClick={() => handleButtonClick(record)} my={1}>
+               Посмотреть
+             </Button>
+           )}
+         </>
+        },
           {
-            accessor: "id",
-            title: "ID",
-          },
-          {
-            accessor: "name",
+            accessor: "Name",
             title: "Имя",
             width: 400,
 
           },
           {
-            accessor: "role",
+            accessor: "Role",
             title: "Роль",
           },
           {
@@ -219,7 +290,7 @@ export const StudentsPage = () => {
                   color="red"
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteStudent(record.id)
+                    deleteStudent(record.Id)
                   }}
                 >
                   <IconTrash size={16} />

@@ -16,80 +16,82 @@ import { axiosInstance } from "../axios";
 import FormData from "form-data";
 
 interface DishProps {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageId?: string;
+  Id: string;
+  Title: string;
+  Description: string;
+  Orice: number;
+  ImageId?: string;
 } 
 
 export const DishesPage: React.FC = () => {
   const token = localStorage.getItem("token");
   const [dishes, setDishes] = useState<DishProps[]>([]);
   const handleDeleteDish = (id: string) => {
-    console.log(1,id)
-    setDishes(dishes.filter((dish) => dish.id !== id));
+    setDishes(dishes.filter((dish) => dish.Id !== id));
   };
   const handleSaveDish = (obj_now:any) => {
-    let index_element=dishes.findIndex(dish=>dish.id ==obj_now.id)
+    let index_element=dishes.findIndex(dish=>dish.Id ==obj_now.id)
     dishes[index_element]=obj_now
     setDishes([...dishes])
   };
   useEffect(() => {
     const fetchData = async () => {
-      const result: AxiosResponse = await axiosInstance.get(`/api/Dishes`, {
+      const response: AxiosResponse = await axiosInstance.get(`/api/Dishes`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      //console.log(result)
-      setDishes(result.data);
+      const parse_data = response.data.data.map((qwe: string)  => JSON.parse(qwe));
+      console.log(parse_data)
+      setDishes(parse_data);
     };
     fetchData();
   }, []);
-
   const FormModal = () => {
     const [image, setImage] = useState<File | null>(null);
-    console.log(image)
     const form = useForm({
       initialValues: {
-        title: "",
-        description: "",
-        price: 0,
+        Title: "",
+        Description: "",
+        Price: 0,
       },
     });
-
     const saveDish = async () => {
-      let imageId = null;
+      let ImageId = null;
       if (image) {
-        
+        console.log(image)
         const data = new FormData();
         data.append("uploadedFile", image, image?.name);
         const imageResult = await axiosInstance.post("/api/FileUpload", data, {
           headers: { authorization: `Bearer ${token}` },
         });
+        console.log(imageResult)
           
         if (imageResult.data.statusCode === 200)
-          imageId = imageResult.data.data;
+          ImageId = imageResult.data.data;
       }
-    
+      
       const result: AxiosResponse = await axiosInstance.post(
-        "/api/Dishes",
+        `/api/Dishes`,
         {
-          title: form.values.title,
-          description: form.values.description,
-          price: form.values.price,
-          imageId,
-        },
+          Title: form.values.Title,
+          Price: form.values.Price,
+          ImageId,
+          Description: form.values.Description,
+          $type:"Dish"
+          },
         {
           headers: {
+            'Content-Type': 'application/json',
+            'accept': 'text/plain',
             Authorization: `Bearer ${token}`,
           },
         }
-      );
-        console.log(result.data)
+      );  
+      console.log(JSON.parse(result.data.data))
+        
       if (result.status === 200) {
-        setDishes([...dishes, result.data]);
+        setDishes([...dishes, JSON.parse(result.data.data)]);
         showNotification({
           title: "Успешно",
           message: "Блюдо создано",
@@ -104,26 +106,25 @@ export const DishesPage: React.FC = () => {
           color: "red",
         });
       }
-
+      
     };
-  
     return (
       <form onSubmit={form.onSubmit(saveDish)}>
         <TextInput
           label="Название"
           placeholder="Название"
           data-autofocus
-          value={form.values.title}
+          value={form.values.Title}
           onChange={(event) =>
-            form.setFieldValue("title", event.currentTarget.value)
+            form.setFieldValue("Title", event.currentTarget.value)
           }
         />
         <Textarea
           label="Описание"
           placeholder="Описание"
-          value={form.values.description}
+          value={form.values.Description}
           onChange={(event) =>
-            form.setFieldValue("description", event.currentTarget.value)
+            form.setFieldValue("Description", event.currentTarget.value)
           }
         />
         <FileInput
@@ -136,8 +137,8 @@ export const DishesPage: React.FC = () => {
         <NumberInput
           label="Цена"
           defaultValue={0}
-          value={form.values.price}
-          onChange={(value: number) => form.setFieldValue("price", value)}
+          value={form.values.Price}
+          onChange={(value: number) => form.setFieldValue("Price", value)}
         />
         <Button type="submit" fullWidth mt="md">
           Сохранить
@@ -145,7 +146,7 @@ export const DishesPage: React.FC = () => {
       </form>
     );
   };
-
+  //dishes.map((dish: any) => (console.log(dish)))
   return (
     <>
       <Button
@@ -160,8 +161,8 @@ export const DishesPage: React.FC = () => {
         Создать
       </Button>
       {dishes &&
-        dishes.map((dish: IDish) => (
-          <DishComponent dish={dish} key={dish.id} onDelete={handleDeleteDish} onSave={handleSaveDish} />
+        dishes.map((dish: any) => (
+          <DishComponent dish={dish} key={dish.Id} onDelete={handleDeleteDish} onSave={handleSaveDish} />
         ))}
     </>
   );

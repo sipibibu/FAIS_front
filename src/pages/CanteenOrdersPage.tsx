@@ -4,110 +4,106 @@ import { axiosInstance } from "../axios";
 import { Box, Button, Navbar, NavLink } from "@mantine/core";
 
 export const CanteenOrdersPage = () => {
-  const token = localStorage.getItem("token");
-  const [fetching, setFetching] = useState(true);
+  const [orders, setOrders] = useState([]);
   const [classes, setClasses] = useState([]);
-  const [orders, setOrders] = useState<any[]>([]);
-
-  const [reportUrl, setReportUrl] = useState('')
+  const [dishes, setDishes] = useState([]);
+  const [tableData, setTableData] = useState<any>({});
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axiosInstance.get("/api/Class/GetClasses", {
+      const token = "your_auth_token_here";
+
+      const responseOrders = await axiosInstance.get("/Get", {
         headers: { authorization: `Bearer ${token}` },
       });
+      const parsedOrders = responseOrders.data.data.map((qwe: string) => JSON.parse(qwe));
+      setOrders(parsedOrders);
 
-      // setClasses(() => response.data.data);
+      const responseClasses = await axiosInstance.get("/api/Class/GetClasses", {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const parsedClasses = responseClasses.data.data.map((qwe: string) => JSON.parse(qwe));
+      setClasses(parsedClasses);
 
-      for (const cl of response.data.data) {
-        const response_o = await axiosInstance.get(
-          `/api/Report/GetByClass?classId=${cl.id}`
-        );
-        console.log([
-          ...new Map(
-            [
-              ...orders,
-              {
-                classInfo: cl,
-                classOrders: response_o.data.data,
-                dishes: response_o.data.data
-                  .map((order: any) => order.dishes)
-                  .flat(10),
-              },
-            ].map((item) => [item.id, item])
-          ).values(),
-        ]);
-        
-        setOrders((old) => [
-          ...new Map(
-            [
-              ...old,
-              {
-                classInfo: cl,
-                classOrders: response_o.data.data,
-                dishes: response_o.data.data
-                  .map((order: any) => order.dishes)
-                  .flat(10),
-              },
-            ].map((item) => [item.id, item])
-          ).values(),
-        ]);
-      }
-      setFetching(false);
+      const responseDishes = await axiosInstance.get("/api/Dishes", {
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const parsedDishes = responseDishes.data.data.map((qwe: string) => JSON.parse(qwe));
+      setDishes(parsedDishes);
     };
-    
+
     fetchData();
   }, []);
-  
+
+  useEffect(() => {
+    // organize orders by class and dish
+    const data:any = {};
+    orders.forEach((order:any) => {
+      const schoolKidId = order.SchoolKidId;
+      const classObj:any = classes.find((c:any) => c.SchoolKidIds.includes(schoolKidId));
+      if (!classObj) return;
+
+      const className = classObj.Title;
+
+      order.DishesIds.forEach((dishId:any) => {
+        const dish:any = dishes.find((d:any) => d.Id === dishId);
+        if (!dish) return;
+
+        const dishName:any = dish.Title;
+
+        if (!data[className]) data[className] = {};
+        if (!data[className][dishName]) data[className][dishName] = 0;
+
+        data[className][dishName]++;
+      });
+    });
+
+    setTableData(data);
+  }, [orders, classes, dishes]);
+  console.log(orders)
   return (
-    <Box><a href={`http://212.96.201.66:8000/api/Report/GetExcel/`} download>
-      <Button mx={10}>{reportUrl ? 'Скачать' : 'Сформировать общий отчёт'}</Button>
-    </a><DataTable
-        my={10}
-        withBorder
-        borderRadius="sm"
-        idAccessor="classInfo.id"
-        withColumnBorders
-        striped
-        highlightOnHover
-        fetching={fetching}
-        columns={[
-          { accessor: "classInfo.title", title: "Класс" },
-          {
-            accessor: "classOrders",
-            title: "Количество заказов",
-            render: (record) => record.classOrders.length,
-          },
-          {
-            accessor: 'downloadReport', title: 'Отчет', render: record => <a href={`http://212.96.201.66:8000/api/Report/GetExcel/${record.classInfo.id}`} download>
-              <Button mx={10}>{reportUrl ? 'Скачать' : 'Сформировать отчёт'}</Button>
-            </a>
-          }
-        ]}
-        records={orders}
-        rowExpansion={{
-          content: ({ record }) => (
-            <>
-              <Box>
-                {record.classOrders
-                  .map((order: any) => [...new Set(order.dishIds)]).length > 0 && record.classOrders
-                    .map((order: any) => [...new Set(order.dishIds)])
-                    .reduce((a: any, b: any) => [...new Set([...a, ...b])])
-                    .map((dish: any) => {
-                      const item = record.dishes.find((x: any) => x.id === dish);
-                      return (
-                        <NavLink
-                          key={dish}
-                          label={`${item.title} (${record.dishes.filter((x: any) => x.id === dish).length
-                            }шт.)`}
-                        />
-                      );
-                    })}
-              </Box>
-            </>
-          ),
-        }}
-      />
-    </Box >
+    <>
+    <DataTable
+  withBorder
+  borderRadius="sm"
+  withColumnBorders
+  minHeight={100}
+  striped
+  highlightOnHover
+  columns={[
+    {
+      accessor: "Title",
+      title: "Class"
+    },
+    {
+      accessor: "DishesIds",
+      title: "Number of Dishes",
+      render: (record:any) => record.DishesIds.length,
+    },
+  ]}
+  records={orders}
+/>
+      <h1>Table</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Class</th>
+            {dishes.map((dish:any) => (
+              <th key={dish.Id}>{dish.Title}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(tableData).map((className:any) => (
+            <tr key={className}>
+              <td>{className}</td>
+              {dishes.map((dish:any) => (
+                <td key={dish.Id}>{tableData[className]?.[dish.Title] || 0}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
-};
+}

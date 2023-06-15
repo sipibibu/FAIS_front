@@ -1,15 +1,17 @@
 export interface IMenu {
-  id: string;
-  title: string;
-  description: string;
-  timeToService: number;
-  dishes: IDish[];
+  map(arg0: (dish: any) => any[]): string[] | undefined;
+  DishesIds: any;
+  Id: string;
+  Title: string;
+  Description: string;
+  TimeToService: number;
+  Dishes: IDish[];
 }
 
 export interface IDish {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageId?: string;
+  Id: string;
+  Title: string;
+  Description: string;
+  Price: number;
+  ImageId?: string;
 }

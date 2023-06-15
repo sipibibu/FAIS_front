@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { MenusPage, LoginPage, DishPage } from "./pages";
+import { MenusPage, LoginPage } from "./pages";
 import { RecoilRoot, useRecoilState, useRecoilValue } from "recoil";
 import { MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
@@ -20,6 +20,7 @@ import { Order_buffet } from "./pages/Order_buffet";
 import { Menus_buffet } from "./pages/Menus_buffet";
 import { SchoolkidPage } from "./pages/SchoolKidPage";
 import { YooMoneyCheckout } from "./pages/Money";
+import { Calendar_p } from "./pages/Calendar_p";
 
 function App() {
 
@@ -35,7 +36,6 @@ function App() {
                   <Route path="account" element={<AccountPage />} />
                   <Route path="menus" element={<MenusPage />} />
                   <Route path="dishes" element={<DishesPage />} />
-                  <Route path="dishes/:dishId" element={<DishPage />} />
                   <Route path="teachers" element={<TeachersPage />} />
                   <Route path="classes" element={<ClassesPage />} />
                   <Route path="parents" element={<ParentsPage />} />
@@ -49,6 +49,7 @@ function App() {
                   <Route path="canteen" element={<CanteenOrdersPage />} />
                   <Route path="employees" element={<EmployeesPage />} />
                   <Route path="zxc" element={<YooMoneyCheckout />} />
+                  <Route path="calendar" element={<Calendar_p />} />
                 </Route>
                 <Route path="/login" element={<LoginPage />} />
               </Routes>
